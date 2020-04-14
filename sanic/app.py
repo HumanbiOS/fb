@@ -30,7 +30,7 @@ app = Sanic(__name__)
 PAT = 'EAArISv5K1gEBAOTgv1jyQYZC0bbQhvaE0naKxliTOhVwFjF3EinFZC5vskFV1xd7G89ZBh2W4MUSx2fBYzsZCeyW92lVvzHlTMmHXZCBjWjuZAtNLUsPG80k6mFxb5mx4ZA8LbJtaN9stU0zSoJpch7q7IzBMxhfA1ZAQbwXHWRaEYIfmIZBwupZCO'
 VERIFY_TOKEN = 'thisisarandomstringtotest'
 # Use this section to Do API calls to push data wherever needed..in this case telegram channel
-URL = "https://api.telegram.org/bot1135235037:AAGuIT9j1lK7VIBS2AyIycKNLTviOAm6wcY/sendMessage"
+URL = "https://api.telegram.org/bot1135235037:AAGuIT9j1lK7VIBS2AyIycKNLTviOAm6wcY"
 CHAT_ID = "-1001294324217"
 
 # USER_DATA handles all the messages coming from messenger
@@ -554,16 +554,6 @@ def medical_assessment(sender_id):
         # Match questions and answers after assessment
         exam = "A user requested medical help!\n\n"
         exam += "Short story: {}\n".format(USER_DATA[sender_id][STORY])
-        exam += "Attachments:\n"
-        for attachment in USER_DATA[sender_id][ATTACHMENTS]:
-            if IMAGE in attachment:
-                exam += "Image: {}\n\n".format(USER_DATA[sender_id][ATTACHMENTS][IMAGE])
-            elif AUDIO in attachment:
-                exam += "Audio: {}\n\n".format(USER_DATA[sender_id][ATTACHMENTS][AUDIO])
-            elif VIDEO in attachment:
-                exam += "Video: {}\n\n".format(USER_DATA[sender_id][ATTACHMENTS][VIDEO])
-            elif LOCATION in attachment:
-                exam += "Location: {}\n\n".format(USER_DATA[sender_id][ATTACHMENTS][LOCATION])
 
         for questions in lang["medical_assessment"]:
             exam += "{}: {}\n".format(lang["medical_assessment"][questions]["text"], USER_DATA[sender_id][MEDICAL][questions])
@@ -583,7 +573,30 @@ def medical_case(sender_id, examination):
     par = {
         "chat_id": CHAT_ID,
         "text": examination}
-    r = requests.get(url=URL, params=par)
+    r = requests.get(url=URL+"/sendMessage", params=par)
+
+    for attachment in USER_DATA[sender_id][ATTACHMENTS]:
+        if IMAGE in attachment:
+            par = {
+                "chat_id": CHAT_ID,
+                "photo": USER_DATA[sender_id][ATTACHMENTS][IMAGE]}
+            r = requests.get(url=URL + "/sendPhoto", params=par)
+        elif AUDIO in attachment:
+            par = {
+                "chat_id": CHAT_ID,
+                "audio": USER_DATA[sender_id][ATTACHMENTS][AUDIO]}
+            r = requests.get(url=URL + "/sendAudio", params=par)
+        elif VIDEO in attachment:
+            par = {
+                "chat_id": CHAT_ID,
+                "video": USER_DATA[sender_id][ATTACHMENTS][VIDEO]}
+            r = requests.get(url=URL + "/sendVideo", params=par)
+
+        elif LOCATION in attachment:
+            par = {
+                "chat_id": CHAT_ID,
+                "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
+            r = requests.get(url=URL + "/sendMessage", params=par)
 
     return
 

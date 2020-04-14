@@ -641,7 +641,7 @@
 	"new_member_info": {
 		"text": "Bienvenido nuevo miembro. ¡Estamos muy contentos de que estés aquí! Proporcione una breve descripción de lo que le gustaría ayudar y lo que puede hacer. Mantenlo breve y profesional"
 	},
-	"picture": {
+	"media": {
 		"quick_replies": {
 			"0": {
 				"content_type": "text",
@@ -655,6 +655,9 @@
 			}
 		},
 		"text": "También puedes tomarte una foto ahora mismo y enviarla aquí. Esto ayudará a otras personas a comprender su situación."
+	},
+	"attachment": {
+		"text": "Gracias por el archivo adjunto, lo agregamos a su perfil. Puede enviarnos más cosas como ubicación, grabación de voz o un video."
 	},
 	"psychological": {
 		"quick_replies": {

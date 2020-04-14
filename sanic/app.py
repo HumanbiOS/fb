@@ -17,6 +17,7 @@ USER_DATA = {}
 
 # This determines the positional state of the happy_path
 CURRENT_INTENT = "CURRENT_INTENT"
+NEXT_INTENT = "NEXT_INTENT"
 
 # These intents are set throughout the conversation as the user makes his choices
 REPLY = "REPLY"
@@ -24,7 +25,12 @@ LANGUAGE = "LANGUAGE"
 LANGUAGE_CHOICE = ['English', 'Russian', 'Spanish']
 START_OVER = "START_OVER"
 STORY = "STORY"
-PICTURE = "PICTURE"
+MEDIA = "MEDIA"
+ATTACHMENTS = "ATTACHMENTS"
+IMAGE = "IMAGE"
+VIDEO = "VIDEO"
+AUDIO = "AUDIO"
+LOCATION = "LOCATION"
 LEGAL = "LEGAL"
 EMERGENCY_OR_HELP = "EMERGENCY_OR_HELP"
 HELPING = "HELPING"
@@ -75,9 +81,12 @@ async def handle_verification(request):
 
 @app.route('/', methods=['POST'])
 async def handle_message(request):
-    # Handle messages sent by facebook messenger to the application
+    # Performance info
     print("post received - {}".format(time.monotonic()))
+
+    # Handle messages sent by facebook messenger to the application
     data = request.json
+    print(data)
     if data["object"] == "page":
         for entry in data["entry"]:
             for messaging_event in entry["messaging"]:
@@ -93,16 +102,62 @@ async def handle_message(request):
 
                     recipient_id = messaging_event["recipient"]["id"]
 
-                    # Messages replies must contain text, for now...
-                    if "text" not in messaging_event["message"]:
-                        continue
-
-                    message_text = messaging_event["message"]["text"]
                     # Capture what the user said, and handle accordingly
-                    USER_DATA[sender_id][REPLY] = message_text
-                    conversation_handler(sender_id)
+                    # Text
+                    if "text" in messaging_event["message"]:
+                        message_text = messaging_event["message"]["text"]
+                        USER_DATA[sender_id][REPLY] = message_text
+                        conversation_handler(sender_id)
+                    # Attachments
+                    elif "attachments" in messaging_event["message"]:
+                        USER_DATA[sender_id][MEDIA] = "Yes"
+                        USER_DATA[sender_id][ATTACHMENTS] = {}
+                        USER_DATA[sender_id][REPLY] = "attachment"
+                        message_attachments = messaging_event["message"]["attachments"]
+                        for _attachment in message_attachments:
+                            if _attachment["type"] == "image":
+                                USER_DATA[sender_id][ATTACHMENTS][IMAGE] = _attachment["payload"]["url"]
+                            elif _attachment["type"] == "audio":
+                                USER_DATA[sender_id][ATTACHMENTS][AUDIO] = _attachment["payload"]["url"]
+                            elif _attachment["type"] == "video":
+                                USER_DATA[sender_id][ATTACHMENTS][VIDEO] = _attachment["payload"]["url"]
+                            elif _attachment["type"] == "location":
+                                USER_DATA[sender_id][ATTACHMENTS][LOCATION] = _attachment["payload"]["url"]
+
+                        # Check if it is the beginning of a conversation
+                        if USER_DATA[sender_id][START_OVER]:
+                            USER_DATA[sender_id][START_OVER] = False
+                            # Set a default language
+                            USER_DATA[sender_id][LANGUAGE] = 'English'
+                            language(sender_id)
+                            # Set the next intent for the conversation
+                            USER_DATA[sender_id][CURRENT_INTENT] = LANGUAGE
+
+                        # after attachment conversation should continue as normal
+                        USER_DATA[sender_id][NEXT_INTENT] = USER_DATA[sender_id][CURRENT_INTENT]
+                        USER_DATA[sender_id][CURRENT_INTENT] = ATTACHMENTS
+                        conversation_handler(sender_id)
 
     return text("ok")
+
+
+def send_message(sender_id, payload):
+    # Performance info
+    print("response sending.. - {}".format(time.monotonic()))
+
+    # Sending response back to the user using facebook graph API
+    r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                      params={"access_token": PAT},
+                      headers={"Content-Type": "application/json"},
+                      data=js.dumps({
+                          "recipient": {"id": sender_id},
+                          "message": payload
+                      }))
+
+    # Performance info
+    print("response sent - {}".format(time.monotonic()))
+
+    return json(r.content)
 
 
 def conversation_handler(sender_id):
@@ -139,13 +194,13 @@ def conversation_handler(sender_id):
         # Get the user story
         elif USER_DATA[sender_id][CURRENT_INTENT] == STORY:
             USER_DATA[sender_id][STORY] = USER_DATA[sender_id][REPLY]
-            picture(sender_id)
+            media(sender_id)
             # Set the next intent for the conversation
-            USER_DATA[sender_id][CURRENT_INTENT] = PICTURE
+            USER_DATA[sender_id][CURRENT_INTENT] = MEDIA
 
-        # Get the user picture
-        elif USER_DATA[sender_id][CURRENT_INTENT] == PICTURE:
-            USER_DATA[sender_id][PICTURE] = USER_DATA[sender_id][REPLY]
+        # Get the user media
+        elif USER_DATA[sender_id][CURRENT_INTENT] == MEDIA:
+            USER_DATA[sender_id][MEDIA] = USER_DATA[sender_id][REPLY]
             legal(sender_id)
             # Set the next intent for the conversation
             USER_DATA[sender_id][CURRENT_INTENT] = LEGAL
@@ -285,24 +340,15 @@ def conversation_handler(sender_id):
             # Clear all user data
             USER_DATA.pop(sender_id)
 
+        # User sent a attachment
+        elif USER_DATA[sender_id][CURRENT_INTENT] == ATTACHMENTS:
+            attachment(sender_id)
+            USER_DATA[sender_id][CURRENT_INTENT] = USER_DATA[sender_id][NEXT_INTENT]
+
     # Debug info
     print('\n{}\n'.format(USER_DATA))
 
     return
-
-
-def send_message(sender_id, payload):
-    print("response sending.. - {}".format(time.monotonic()))
-    # Sending response back to the user using facebook graph API
-    r = requests.post("https://graph.facebook.com/v2.6/me/messages",
-                      params={"access_token": PAT},
-                      headers={"Content-Type": "application/json"},
-                      data=js.dumps({
-                          "recipient": {"id": sender_id},
-                          "message": payload
-                      }))
-    print("response sent - {}".format(time.monotonic()))
-    return json(r.content)
 
 
 def choose_language(lang):
@@ -331,9 +377,17 @@ def language(sender_id):
     return
 
 
-def picture(sender_id):
+def media(sender_id):
     lang = choose_language(USER_DATA[sender_id][LANGUAGE])
-    payload = lang["picture"]
+    payload = lang["media"]
+    send_message(sender_id, payload)
+
+    return
+
+
+def attachment(sender_id):
+    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    payload = lang["attachment"]
     send_message(sender_id, payload)
 
     return

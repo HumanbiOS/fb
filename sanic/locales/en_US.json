@@ -641,7 +641,7 @@
 	"new_member_info": {
 		"text": "Welcome new member. We are so glad you’re here! Please provide a short description of what you would like to help with and what you can do. Keep it brief and professional"
 	},
-	"picture": {
+	"media": {
 		"quick_replies": {
 			"0": {
 				"content_type": "text",
@@ -655,6 +655,9 @@
 			}
 		},
 		"text": "You can also take a picture of yourself right now and send it here. This will help other people to understand your situation."
+	},
+	"attachment": {
+		"text": "Thank you for the attachment, we added it to your profile. You can send us more things like location, voice recording or a video."
 	},
 	"psychological": {
 		"quick_replies": {

@@ -20,7 +20,7 @@
 			"2": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "Legal notice:\nThe use of this software does not replace medical treatment and does not provide diagnostic services. If you currently feel seriously ill, call a doctor immediately.\n\nThe involved parties act in good faith to fulfill the first aid obligation and the duty to care on a best effort basis.\n\nBy using this software, you agree not to hold liable any of the involved parties (specifically including negligent homicide/assault).\n\nThe involved parties include but are not limited to:\n\n- the individuals or organizations you interact with via this software (specifically including personnel with official medical training or expert..."
@@ -40,7 +40,7 @@
 			"2": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "This is an emergency service. Do you need help?"
@@ -60,7 +60,7 @@
 			"2": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "That's great! Do you wanna help?"
@@ -85,7 +85,7 @@
 			"3": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "Please select the language you want to me to talk in to you from now on."
@@ -129,7 +129,7 @@
 				"6": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Case description: How old are you?"
@@ -149,7 +149,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Did you have chills, feel tired, or worn out? 😪"
@@ -169,7 +169,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Did you have body aches?"
@@ -189,7 +189,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Remember, think about the about last 1-4 days: Did you have a persistent cough? 😷 If you have an allergy or chronic cough, please take that into account."
@@ -209,7 +209,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Did your nose run? 🤧 If you have an allergy or chronic sniffling, please take that into account."
@@ -229,7 +229,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Did you have diarrhea?"
@@ -249,7 +249,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "What about a sore throat?"
@@ -269,7 +269,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "A headache?"
@@ -289,7 +289,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Did you have problems breathing? For example, if: - walking or taking some stairs? - sitting or lying down? - when getting up from bed or a chair? If you have chronic lung disease, please take that into account."
@@ -309,7 +309,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Have you had any taste and/or smell loss in the last 24 hours?"
@@ -329,7 +329,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Have you been diagnosed with chronic lung disease by a doctor?"
@@ -349,7 +349,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Are you living alone at the moment?"
@@ -369,7 +369,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Do you have diabetes?"
@@ -389,7 +389,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Do you have heart disease?"
@@ -409,7 +409,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Are you obese/adipose?"
@@ -429,7 +429,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Are you using steroids?"
@@ -449,7 +449,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Are you taking immunosuppressants?"
@@ -469,7 +469,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Have you been vaccinated against the flu since October 2019?"
@@ -489,7 +489,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Are you taking care of old or sick people?"
@@ -509,7 +509,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Are you working in a crowded place or have a lot of close contact with people in your job?"
@@ -529,7 +529,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Do you smoke?"
@@ -549,7 +549,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Are you, medically speaking, a male or a female?"
@@ -569,7 +569,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Are you pregnant?"
@@ -589,7 +589,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Have you had close contact with a confirmed case?"
@@ -609,7 +609,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Remember the last 1-4 days: Did you have a fever (over 38°C)?"
@@ -630,7 +630,7 @@
 			"2": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "Are you looking for medical assistance? If you would just like to talk to someone press no."
@@ -651,7 +651,7 @@
 			"1": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "You can also take a picture of yourself right now and send it here. This will help other people to understand your situation."
@@ -674,7 +674,7 @@
 			"2": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "Okay. Are you feeling stressed or anxious?"
@@ -705,7 +705,7 @@
 			"0": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "Hello! Thank you for contacting Human Bios. Before we ask you a couple of diagnosis questions, take the opportunity to tell us your story, if you would like to.\n\nWhere are you right now? How are your friends, your family? Do you feel safe?\n\nWe will forward what you tell us to the people that pick up your case."

@@ -1,4 +1,9 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import sys
+import logging
+import os
 import time
 import json as js
 import requests
@@ -6,6 +11,19 @@ import requests
 from sanic import Sanic
 from sanic.response import text, json
 
+# enable logging
+project_path = os.path.dirname(os.path.abspath(__file__))
+logdir_path = os.path.join(project_path, "logs")
+logfile_path = os.path.join(logdir_path, "bot.log")
+
+if not os.path.exists(logdir_path):
+    os.makedirs(logdir_path)
+
+logfile_handler = logging.handlers.WatchedFileHandler(logfile_path, 'a', 'utf-8')
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO, handlers=[logfile_handler])
+logging.getLogger("telegram").setLevel(logging.WARNING)
+logger = logging.getLogger(__name__)
 
 app = Sanic(__name__)
 
@@ -75,21 +93,21 @@ async def handle_verification(request):
     # Successful when verify_token is same as token sent by facebook app
 
     if request.args.get('hub.verify_token', '') == VERIFY_TOKEN:
-        print("succefully verified")
+        logger.info("succefully verified")
         return text(request.args.get('hub.challenge', ''))
     else:
-        print("Wrong verification token!")
+        logger.error("Wrong verification token!")
         return text("Wrong validation token")
 
 
 @app.route('/', methods=['POST'])
 async def handle_message(request):
     # Performance info
-    print("post received - {}".format(time.monotonic()))
+    logger.info("post received - {}".format(time.monotonic()))
 
     # Handle messages sent by facebook messenger to the application
     data = request.json
-    print(data)
+    logger.info(data)
     if data["object"] == "page":
         for entry in data["entry"]:
             for messaging_event in entry["messaging"]:
@@ -146,7 +164,7 @@ async def handle_message(request):
 
 def send_message(sender_id, payload):
     # Performance info
-    print("response sending.. - {}".format(time.monotonic()))
+    logger.info("response sending.. - {}".format(time.monotonic()))
 
     # Sending response back to the user using facebook graph API
     r = requests.post("https://graph.facebook.com/v2.6/me/messages",
@@ -158,7 +176,7 @@ def send_message(sender_id, payload):
                       }))
 
     # Performance info
-    print("response sent - {}".format(time.monotonic()))
+    logger.info("response sent - {}".format(time.monotonic()))
 
     return json(r.content)
 
@@ -177,7 +195,7 @@ def conversation_handler(sender_id):
     # Handle the messages according to the conversation flow
     else:
         # Command handler
-        if USER_DATA[sender_id][REPLY] == "/cancel":
+        if USER_DATA[sender_id][REPLY] == "Stop":
             # Set the next intent for the conversation
             USER_DATA[sender_id][CURRENT_INTENT] = CANCEL
 
@@ -506,7 +524,7 @@ def medical_assessment(sender_id):
 
     for i in range(len(QA)):
         # Command handler
-        if USER_DATA[sender_id][REPLY] == "/cancel":
+        if USER_DATA[sender_id][REPLY] == "Stop":
             # Set the next intent for the conversation
             USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
             USER_DATA[sender_id][CURRENT_INTENT] = CANCEL
@@ -539,13 +557,13 @@ def medical_assessment(sender_id):
         exam += "Attachments:\n"
         for attachment in USER_DATA[sender_id][ATTACHMENTS]:
             if IMAGE in attachment:
-                exam += "Image: {}\n".format(USER_DATA[sender_id][ATTACHMENTS][IMAGE])
+                exam += "Image: {}\n\n".format(USER_DATA[sender_id][ATTACHMENTS][IMAGE])
             elif AUDIO in attachment:
-                exam += "Audio: {}\n".format(USER_DATA[sender_id][ATTACHMENTS][AUDIO])
+                exam += "Audio: {}\n\n".format(USER_DATA[sender_id][ATTACHMENTS][AUDIO])
             elif VIDEO in attachment:
-                exam += "Video: {}\n".format(USER_DATA[sender_id][ATTACHMENTS][VIDEO])
+                exam += "Video: {}\n\n".format(USER_DATA[sender_id][ATTACHMENTS][VIDEO])
             elif LOCATION in attachment:
-                exam += "Location: {}\n".format(USER_DATA[sender_id][ATTACHMENTS][LOCATION])
+                exam += "Location: {}\n\n".format(USER_DATA[sender_id][ATTACHMENTS][LOCATION])
 
         for questions in lang["medical_assessment"]:
             exam += "{}: {}\n".format(lang["medical_assessment"][questions]["text"], USER_DATA[sender_id][MEDICAL][questions])

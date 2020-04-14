@@ -20,7 +20,7 @@
 			"2": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "Aviso Legal:\nEl uso de este software no reemplaza el tratamiento médico y no proporciona servicios de diagnóstico. Si actualmente se siente gravemente enfermo, llame a un médico de inmediato.\n\nLas partes involucradas actúan de buena fe para cumplir con la obligación de primeros auxilios y el deber de cuidar con el mejor esfuerzo.\n\nAl usar este software, usted acepta no responsabilizar a ninguna de las partes involucradas (incluyendo específicamente homicidio / asalto negligente).\n\nLas partes involucradas incluyen, pero no se limitan a:\n\n- las personas u organizaciones con las que interactúa a través de este software (incluido específicamente el personal con capacitación médica oficial o experto ..."
@@ -40,7 +40,7 @@
 			"2": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "Este es un servicio de emergencia. ¿Necesitas ayuda?"
@@ -60,7 +60,7 @@
 			"2": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "¡Eso es genial! Quieres ayudar"
@@ -85,7 +85,7 @@
 			"3": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "Please select the language you want to me to talk in to you from now on."
@@ -129,7 +129,7 @@
 				"6": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Descripción del caso: ¿Cuántos años tienes?"
@@ -149,7 +149,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Tuvo escalofríos, se sintió cansado o agotado? 😪"
@@ -169,7 +169,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Tuviste dolores en el cuerpo?"
@@ -189,7 +189,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Recuerde, piense en los últimos 1-4 días: ¿Tuvo una tos persistente? 😷 Si tiene alergia o tos crónica, tenga eso en cuenta."
@@ -209,7 +209,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Te corrió la nariz? 🤧 Si tiene una alergia o un resfriado crónico, tenga eso en cuenta."
@@ -229,7 +229,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Tuviste diarrea?"
@@ -249,7 +249,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Qué tal un dolor de garganta?"
@@ -269,7 +269,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Un dolor de cabeza?"
@@ -289,7 +289,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Tuviste problemas para respirar? Por ejemplo, si: - ¿camina o toma algunas escaleras? - sentado o acostado? - al levantarse de la cama o una silla? Si tiene una enfermedad pulmonar crónica, tenga eso en cuenta."
@@ -309,7 +309,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Ha tenido pérdida de sabor y / o olor en las últimas 24 horas?"
@@ -329,7 +329,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Le ha diagnosticado una enfermedad pulmonar crónica un médico?"
@@ -349,7 +349,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Estás viviendo solo en este momento?"
@@ -369,7 +369,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Tienes diabetes?"
@@ -389,7 +389,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Tienes enfermedad cardíaca?"
@@ -409,7 +409,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Eres obeso / adiposo?"
@@ -429,7 +429,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Estás usando esteroides?"
@@ -449,7 +449,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Estás tomando inmunosupresores?"
@@ -469,7 +469,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Te han vacunado contra la gripe desde octubre de 2019?"
@@ -489,7 +489,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Cuida de personas mayores o enfermas?"
@@ -509,7 +509,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Está trabajando en un lugar lleno de gente o tiene mucho contacto cercano con personas en su trabajo?"
@@ -529,7 +529,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Fumas?"
@@ -549,7 +549,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Eres, médicamente hablando, un hombre o una mujer?"
@@ -569,7 +569,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Estás embarazada?"
@@ -589,7 +589,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "¿Has tenido contacto cercano con un caso confirmado?"
@@ -609,7 +609,7 @@
 				"2": {
 					"content_type": "text",
 					"payload": "<POSTBACK_PAYLOAD>",
-					"title": "/cancel"
+					"title": "Stop"
 				}
 			},
 			"text": "Recuerde los últimos 1-4 días: ¿tuvo fiebre (más de 38 ° C)?"
@@ -630,7 +630,7 @@
 			"2": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "¿Estás buscando asistencia médica? Si solo desea hablar con alguien, presione no."
@@ -651,7 +651,7 @@
 			"1": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "También puedes tomarte una foto ahora mismo y enviarla aquí. Esto ayudará a otras personas a comprender su situación."
@@ -674,7 +674,7 @@
 			"2": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "Bueno. ¿Te sientes estresado o ansioso?"
@@ -705,7 +705,7 @@
 			"0": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "/cancel"
+				"title": "Stop"
 			}
 		},
 		"text": "¡Hola! Gracias por contactar a Human Bios. Antes de hacerle un par de preguntas de diagnóstico, aproveche la oportunidad para contarnos su historia, si lo desea.\n\n¿Dónde estás ahora mismo? ¿Cómo están tus amigos, tu familia? ¿Te sientes seguro?\n\nReenviaremos lo que nos diga a las personas que recojan su caso."

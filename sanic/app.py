@@ -99,6 +99,7 @@ async def handle_message(request):
                     # New user starts from the beginning
                     if START_OVER not in USER_DATA[sender_id]:
                         USER_DATA[sender_id][START_OVER] = True
+                        USER_DATA[sender_id][ATTACHMENTS] = {}
 
                     recipient_id = messaging_event["recipient"]["id"]
 
@@ -111,7 +112,6 @@ async def handle_message(request):
                     # Attachments
                     elif "attachments" in messaging_event["message"]:
                         USER_DATA[sender_id][MEDIA] = "Yes"
-                        USER_DATA[sender_id][ATTACHMENTS] = {}
                         USER_DATA[sender_id][REPLY] = "attachment"
                         message_attachments = messaging_event["message"]["attachments"]
                         for _attachment in message_attachments:

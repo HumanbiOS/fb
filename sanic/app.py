@@ -41,6 +41,7 @@ CURRENT_INTENT = "CURRENT_INTENT"
 NEXT_INTENT = "NEXT_INTENT"
 
 # These intents are set throughout the conversation as the user makes his choices
+PROFILE = "PROFILE"
 REPLY = "REPLY"
 LANGUAGE = "LANGUAGE"
 LANGUAGE_CHOICE = ['English', 'Russian', 'Spanish']
@@ -113,9 +114,13 @@ async def handle_message(request):
             for messaging_event in entry["messaging"]:
                 if messaging_event.get("message"):
                     sender_id = messaging_event["sender"]["id"]
+
                     # If the user ID is unknown, add a new key
                     if sender_id not in USER_DATA:
                         USER_DATA[sender_id] = {}
+                        # Get user profile only once
+                        get_user_profile(sender_id)
+
 
                     # New user starts from the beginning
                     if START_OVER not in USER_DATA[sender_id]:
@@ -160,6 +165,19 @@ async def handle_message(request):
                         conversation_handler(sender_id)
 
     return text("ok")
+
+
+def get_user_profile(sender_id):
+    # Get user profile using facebook graph API
+    par = {
+        "access_token": PAT,
+        "fields": "first_name,last_name,profile_pic"}
+    r = requests.get(url="https://graph.facebook.com/" + sender_id, params=par)
+
+    USER_DATA[sender_id][PROFILE] = r.json()
+    logger.info("New FB user - {}".format(USER_DATA[sender_id][PROFILE]))
+
+    return json(r.content)
 
 
 def send_message(sender_id, payload):
@@ -553,6 +571,8 @@ def medical_assessment(sender_id):
         send_message(sender_id, payload)
         # Match questions and answers after assessment
         exam = "A user requested medical help!\n\n"
+        exam += "Name: {} {}\n".format(USER_DATA[sender_id][PROFILE]["first_name"], USER_DATA[sender_id][PROFILE]["last_name"])
+        exam += "FB UserId: {}\n".format(sender_id)
         exam += "Short story: {}\n".format(USER_DATA[sender_id][STORY])
 
         for questions in lang["medical_assessment"]:
@@ -570,11 +590,14 @@ def medical_case(sender_id, examination):
     payload = lang["medical_case"]
     send_message(sender_id, payload)
 
+    # Send facebook profile pic
     par = {
         "chat_id": CHAT_ID,
-        "text": examination}
-    r = requests.get(url=URL+"/sendMessage", params=par)
-
+        "photo": USER_DATA[sender_id][PROFILE]["profile_pic"],
+        "caption": "User Facebook Profile Pic"
+    }
+    r = requests.get(url=URL + "/sendPhoto", params=par)
+    # Prepare attachments
     for attachment in USER_DATA[sender_id][ATTACHMENTS]:
         if IMAGE in attachment:
             par = {
@@ -597,6 +620,12 @@ def medical_case(sender_id, examination):
                 "chat_id": CHAT_ID,
                 "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
             r = requests.get(url=URL + "/sendMessage", params=par)
+
+    # Send examination
+    par = {
+        "chat_id": CHAT_ID,
+        "text": examination}
+    r = requests.get(url=URL+"/sendMessage", params=par)
 
     return
 

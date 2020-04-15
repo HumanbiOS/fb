@@ -3,6 +3,7 @@
 
 import sys
 import logging
+from logging.handlers import WatchedFileHandler
 import os
 import time
 import json as js
@@ -10,6 +11,7 @@ import requests
 
 from sanic import Sanic
 from sanic.response import text, json
+from config import settings
 
 # enable logging
 project_path = os.path.dirname(os.path.abspath(__file__))
@@ -20,18 +22,18 @@ if not os.path.exists(logdir_path):
     os.makedirs(logdir_path)
 
 logfile_handler = logging.handlers.WatchedFileHandler(logfile_path, 'a', 'utf-8')
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+logging.basicConfig(format='[%(asctime)s] [%(name)s] [%(levelname)s] - %(message)s',
                     level=logging.INFO, handlers=[logfile_handler])
 logging.getLogger("telegram").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 app = Sanic(__name__)
 
-PAT = 'EAArISv5K1gEBAOTgv1jyQYZC0bbQhvaE0naKxliTOhVwFjF3EinFZC5vskFV1xd7G89ZBh2W4MUSx2fBYzsZCeyW92lVvzHlTMmHXZCBjWjuZAtNLUsPG80k6mFxb5mx4ZA8LbJtaN9stU0zSoJpch7q7IzBMxhfA1ZAQbwXHWRaEYIfmIZBwupZCO'
-VERIFY_TOKEN = 'thisisarandomstringtotest'
+PAT = settings.PAT
+VERIFY_TOKEN = settings.VERIFY_TOKEN
 # Use this section to Do API calls to push data wherever needed..in this case telegram channel
-URL = "https://api.telegram.org/bot1135235037:AAGuIT9j1lK7VIBS2AyIycKNLTviOAm6wcY"
-CHAT_ID = "-1001294324217"
+URL = "https://api.telegram.org/bot" + settings.TELEGRAM_BOT_TOKEN
+FORWARDING_CHANNEL_ID = settings.FORWARDING_CHANNEL_ID
 
 # USER_DATA handles all the messages coming from messenger
 USER_DATA = {}
@@ -122,7 +124,6 @@ async def handle_message(request):
                         # Get user profile only once
                         get_user_profile(sender_id)
 
-
                     # New user starts from the beginning
                     if START_OVER not in USER_DATA[sender_id]:
                         USER_DATA[sender_id][START_OVER] = True
@@ -155,7 +156,7 @@ async def handle_message(request):
                                     b = a[1].split('%252C%2B')
                                     c = b[1].split('%26FORM%')
                                     USER_DATA[sender_id][ATTACHMENTS][LOCATION] = {"latitude": b[0], "longitude": c[0]}
-                                except:
+                                except Exception as e:
                                     USER_DATA[sender_id][ATTACHMENTS][LOCATION] = _attachment["payload"]["url"]
 
                         # Check if it is the beginning of a conversation
@@ -447,7 +448,7 @@ def attachment(sender_id):
 def send_attachments(sender_id):
     # Send facebook profile pic
     par = {
-        "chat_id": CHAT_ID,
+        "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
         "photo": USER_DATA[sender_id][PROFILE]["profile_pic"],
         "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
                                   USER_DATA[sender_id][PROFILE]["last_name"])
@@ -458,7 +459,7 @@ def send_attachments(sender_id):
     for attachment in USER_DATA[sender_id][ATTACHMENTS]:
         if IMAGE in attachment:
             par = {
-                "chat_id": CHAT_ID,
+                "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
                 "photo": USER_DATA[sender_id][ATTACHMENTS][IMAGE],
                 "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
                                           USER_DATA[sender_id][PROFILE]["last_name"])
@@ -467,7 +468,7 @@ def send_attachments(sender_id):
             r = requests.get(url=URL + "/sendPhoto", params=par)
         elif AUDIO in attachment:
             par = {
-                "chat_id": CHAT_ID,
+                "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
                 "audio": USER_DATA[sender_id][ATTACHMENTS][AUDIO],
                 "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
                                           USER_DATA[sender_id][PROFILE]["last_name"])
@@ -475,7 +476,7 @@ def send_attachments(sender_id):
             r = requests.get(url=URL + "/sendAudio", params=par)
         elif VIDEO in attachment:
             par = {
-                "chat_id": CHAT_ID,
+                "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
                 "video": USER_DATA[sender_id][ATTACHMENTS][VIDEO],
                 "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
                                           USER_DATA[sender_id][PROFILE]["last_name"])
@@ -486,19 +487,19 @@ def send_attachments(sender_id):
             try:
                 if "latitude" in USER_DATA[sender_id][ATTACHMENTS][LOCATION]:
                     par = {
-                        "chat_id": CHAT_ID,
+                        "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
                         "latitude": USER_DATA[sender_id][ATTACHMENTS][LOCATION]["latitude"],
                         "longitude": USER_DATA[sender_id][ATTACHMENTS][LOCATION]["longitude"]
                     }
                     r = requests.get(url=URL + "/sendLocation", params=par)
                 else:
                     par = {
-                        "chat_id": CHAT_ID,
+                        "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
                         "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
                     r = requests.get(url=URL + "/sendMessage", params=par)
-            except:
+            except Exception as e:
                 par = {
-                    "chat_id": CHAT_ID,
+                    "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
                     "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
                 r = requests.get(url=URL + "/sendMessage", params=par)
 
@@ -555,7 +556,7 @@ def new_member_confirm(sender_id):
 
     # Send examination
     par = {
-        "chat_id": CHAT_ID,
+        "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
         "text": exam}
     r = requests.get(url=URL + "/sendMessage", params=par)
 
@@ -605,7 +606,7 @@ def psychological_case(sender_id):
 
     # Send examination
     par = {
-        "chat_id": CHAT_ID,
+        "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
         "text": exam}
     r = requests.get(url=URL + "/sendMessage", params=par)
 
@@ -705,7 +706,7 @@ def medical_case(sender_id):
 
     # Send examination
     par = {
-        "chat_id": CHAT_ID,
+        "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
         "text": exam}
     r = requests.get(url=URL+"/sendMessage", params=par)
 

@@ -1,1 +1,2 @@
-/sanic/logs/bot.log
+/logs/bot.log
+/.env

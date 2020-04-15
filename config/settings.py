@@ -19,4 +19,4 @@ VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "")
 # Telegram bot
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 # Telegram channels
-FORWARDING_CHANNEL_ID = os.getenv("FORWARDING_CHANNEL")
+FORWARDING_CHANNEL_ID = os.getenv("FORWARDING_CHANNEL_ID", "")

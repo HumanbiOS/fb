@@ -9,6 +9,12 @@ import time
 import json as js
 import requests
 
+from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
+from telegram import (InlineKeyboardMarkup, InlineKeyboardButton)
+from telegram import (KeyboardButton)
+from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
+                          ConversationHandler, CallbackQueryHandler)
+
 from sanic import Sanic
 from sanic.response import text, json
 from config import settings
@@ -29,8 +35,10 @@ logger = logging.getLogger(__name__)
 
 app = Sanic(__name__)
 
+# Facebook Bot settings
 PAT = settings.PAT
 VERIFY_TOKEN = settings.VERIFY_TOKEN
+
 # Use this section to Do API calls to push data wherever needed..in this case telegram channel
 URL = "https://api.telegram.org/bot" + settings.TELEGRAM_BOT_TOKEN
 FORWARDING_CHANNEL_ID = settings.FORWARDING_CHANNEL_ID
@@ -448,7 +456,7 @@ def attachment(sender_id):
 def send_attachments(sender_id):
     # Send facebook profile pic
     par = {
-        "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
+        "chat_id": FORWARDING_CHANNEL_ID,
         "photo": USER_DATA[sender_id][PROFILE]["profile_pic"],
         "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
                                   USER_DATA[sender_id][PROFILE]["last_name"])
@@ -459,7 +467,7 @@ def send_attachments(sender_id):
     for attachment in USER_DATA[sender_id][ATTACHMENTS]:
         if IMAGE in attachment:
             par = {
-                "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
+                "chat_id": FORWARDING_CHANNEL_ID,
                 "photo": USER_DATA[sender_id][ATTACHMENTS][IMAGE],
                 "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
                                           USER_DATA[sender_id][PROFILE]["last_name"])
@@ -468,7 +476,7 @@ def send_attachments(sender_id):
             r = requests.get(url=URL + "/sendPhoto", params=par)
         elif AUDIO in attachment:
             par = {
-                "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
+                "chat_id": FORWARDING_CHANNEL_ID,
                 "audio": USER_DATA[sender_id][ATTACHMENTS][AUDIO],
                 "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
                                           USER_DATA[sender_id][PROFILE]["last_name"])
@@ -476,7 +484,7 @@ def send_attachments(sender_id):
             r = requests.get(url=URL + "/sendAudio", params=par)
         elif VIDEO in attachment:
             par = {
-                "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
+                "chat_id": FORWARDING_CHANNEL_ID,
                 "video": USER_DATA[sender_id][ATTACHMENTS][VIDEO],
                 "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
                                           USER_DATA[sender_id][PROFILE]["last_name"])
@@ -487,19 +495,19 @@ def send_attachments(sender_id):
             try:
                 if "latitude" in USER_DATA[sender_id][ATTACHMENTS][LOCATION]:
                     par = {
-                        "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
+                        "chat_id": FORWARDING_CHANNEL_ID,
                         "latitude": USER_DATA[sender_id][ATTACHMENTS][LOCATION]["latitude"],
                         "longitude": USER_DATA[sender_id][ATTACHMENTS][LOCATION]["longitude"]
                     }
                     r = requests.get(url=URL + "/sendLocation", params=par)
                 else:
                     par = {
-                        "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
+                        "chat_id": FORWARDING_CHANNEL_ID,
                         "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
                     r = requests.get(url=URL + "/sendMessage", params=par)
             except Exception as e:
                 par = {
-                    "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
+                    "chat_id": FORWARDING_CHANNEL_ID,
                     "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
                 r = requests.get(url=URL + "/sendMessage", params=par)
 
@@ -554,11 +562,15 @@ def new_member_confirm(sender_id):
     exam += "Short story: {}\n".format(USER_DATA[sender_id][STORY])
     exam += "Case description: {}\n".format(USER_DATA[sender_id][NEW_MEMBER])
 
-    # Send examination
+    # # Send examination
     par = {
-        "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
-        "text": exam}
-    r = requests.get(url=URL + "/sendMessage", params=par)
+        "chat_id": FORWARDING_CHANNEL_ID,
+        "text": exam,
+        "reply_markup": {"inline_keyboard": [[{"text": "Report User", "url": "https://facebook.com"}]]}
+    }
+    r = requests.post(url=URL + "/sendMessage",
+                      headers={"Content-Type": "application/json"},
+                      data=js.dumps(par))
 
     return
 
@@ -606,9 +618,14 @@ def psychological_case(sender_id):
 
     # Send examination
     par = {
-        "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
-        "text": exam}
-    r = requests.get(url=URL + "/sendMessage", params=par)
+        "chat_id": FORWARDING_CHANNEL_ID,
+        "text": exam,
+        "reply_markup": {"inline_keyboard": [[{"text": "Assign Case to me", "url": "https://facebook.com"},
+                                             {"text": "Report User", "url": "https://facebook.com"}]]}
+    }
+    r = requests.post(url=URL + "/sendMessage",
+                      headers={"Content-Type": "application/json"},
+                      data=js.dumps(par))
 
     return
 
@@ -706,9 +723,14 @@ def medical_case(sender_id):
 
     # Send examination
     par = {
-        "FORWARDING_CHANNEL_ID": FORWARDING_CHANNEL_ID,
-        "text": exam}
-    r = requests.get(url=URL+"/sendMessage", params=par)
+        "chat_id": FORWARDING_CHANNEL_ID,
+        "text": exam,
+        "reply_markup": {"inline_keyboard": [[{"text": "Assign Case to me", "url": "https://facebook.com"},
+                                             {"text": "Report User", "url": "https://facebook.com"}]]}
+    }
+    r = requests.post(url=URL + "/sendMessage",
+                      headers={"Content-Type": "application/json"},
+                      data=js.dumps(par))
 
     return
 

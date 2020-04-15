@@ -60,7 +60,8 @@ NEW_MEMBER = "NEW_MEMBER"
 MEDICAL_OR_PSYCHOLOGICAL = "MEDICAL_OR_PSYCHOLOGICAL"
 PSYCHOLOGICAL = "PSYCHOLOGICAL"
 PSYCHOLOGICAL_WAIT = "PSYCHOLOGICAL_WAIT"
-PSYCHOLOGIST_FOUND = "PSYCHOLOGIST_FOUND"
+PSYCHOLOGICAL_FOUND = "PSYCHOLOGICAL_FOUND"
+PSYCHOLOGICAL_QA = "PSYCHOLOGICAL_QA"
 MEDICAL = "MEDICAL"
 MEDICAL_WAIT = "MEDICAL_WAIT"
 MEDICAL_FOUND = "MEDICAL_FOUND"
@@ -311,6 +312,9 @@ def conversation_handler(sender_id):
             new_member_confirm(sender_id)
             # Set the next intent for the conversation
             USER_DATA[sender_id][CURRENT_INTENT] = FINISH
+            bye(sender_id)
+            # Clear all user data
+            USER_DATA.pop(sender_id)
 
         # Check if user wants medical or psychological help
         elif USER_DATA[sender_id][CURRENT_INTENT] == MEDICAL_OR_PSYCHOLOGICAL:
@@ -339,13 +343,14 @@ def conversation_handler(sender_id):
 
         # Do a psychological case assignment
         elif USER_DATA[sender_id][CURRENT_INTENT] == PSYCHOLOGICAL_WAIT:
+            USER_DATA[sender_id][PSYCHOLOGICAL_QA] = USER_DATA[sender_id][REPLY]
             psychological_case(sender_id)
             # Set the next intent for the conversation
-            USER_DATA[sender_id][CURRENT_INTENT] = PSYCHOLOGIST_FOUND
+            USER_DATA[sender_id][CURRENT_INTENT] = PSYCHOLOGICAL_FOUND
 
         # Chatting to the psychologist
-        elif USER_DATA[sender_id][CURRENT_INTENT] == PSYCHOLOGIST_FOUND:
-            USER_DATA[sender_id][PSYCHOLOGIST_FOUND] = True
+        elif USER_DATA[sender_id][CURRENT_INTENT] == PSYCHOLOGICAL_FOUND:
+            USER_DATA[sender_id][PSYCHOLOGICAL_FOUND] = True
             psychological_found(sender_id)
 
             # Set the next intent for the conversation
@@ -439,6 +444,56 @@ def attachment(sender_id):
     return
 
 
+def send_attachments(sender_id):
+    # Send facebook profile pic
+    par = {
+        "chat_id": CHAT_ID,
+        "photo": USER_DATA[sender_id][PROFILE]["profile_pic"],
+        "caption": "User Facebook Profile Pic"
+    }
+    r = requests.get(url=URL + "/sendPhoto", params=par)
+
+    # Prepare attachments
+    for attachment in USER_DATA[sender_id][ATTACHMENTS]:
+        if IMAGE in attachment:
+            par = {
+                "chat_id": CHAT_ID,
+                "photo": USER_DATA[sender_id][ATTACHMENTS][IMAGE]}
+            r = requests.get(url=URL + "/sendPhoto", params=par)
+        elif AUDIO in attachment:
+            par = {
+                "chat_id": CHAT_ID,
+                "audio": USER_DATA[sender_id][ATTACHMENTS][AUDIO]}
+            r = requests.get(url=URL + "/sendAudio", params=par)
+        elif VIDEO in attachment:
+            par = {
+                "chat_id": CHAT_ID,
+                "video": USER_DATA[sender_id][ATTACHMENTS][VIDEO]}
+            r = requests.get(url=URL + "/sendVideo", params=par)
+
+        elif LOCATION in attachment:
+            try:
+                if "latitude" in USER_DATA[sender_id][ATTACHMENTS][LOCATION]:
+                    par = {
+                        "chat_id": CHAT_ID,
+                        "latitude": USER_DATA[sender_id][ATTACHMENTS][LOCATION]["latitude"],
+                        "longitude": USER_DATA[sender_id][ATTACHMENTS][LOCATION]["longitude"]
+                    }
+                    r = requests.get(url=URL + "/sendLocation", params=par)
+                else:
+                    par = {
+                        "chat_id": CHAT_ID,
+                        "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
+                    r = requests.get(url=URL + "/sendMessage", params=par)
+            except:
+                par = {
+                    "chat_id": CHAT_ID,
+                    "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
+                r = requests.get(url=URL + "/sendMessage", params=par)
+
+    return
+
+
 def legal(sender_id):
     lang = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["disclaimer"]
@@ -476,6 +531,23 @@ def new_member_confirm(sender_id):
     payload = lang["new_member_confirm"]
     send_message(sender_id, payload)
 
+    # Send attachments
+    send_attachments(sender_id)
+
+    # Match questions and answers after assessment
+    exam = "A user wants to help\n\n"
+    exam += "Name: {} {}\n".format(USER_DATA[sender_id][PROFILE]["first_name"],
+                                   USER_DATA[sender_id][PROFILE]["last_name"])
+    exam += "FB UserId: {}\n".format(sender_id)
+    exam += "Short story: {}\n".format(USER_DATA[sender_id][STORY])
+    exam += "Case description: {}\n".format(USER_DATA[sender_id][NEW_MEMBER])
+
+    # Send examination
+    par = {
+        "chat_id": CHAT_ID,
+        "text": exam}
+    r = requests.get(url=URL + "/sendMessage", params=par)
+
     return
 
 
@@ -507,6 +579,24 @@ def psychological_case(sender_id):
     lang = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["psychological_case"]
     send_message(sender_id, payload)
+
+    # Send attachments
+    send_attachments(sender_id)
+
+    # Match questions and answers after assessment
+    exam = "A user wants to talk!\n\n"
+    exam += "Name: {} {}\n".format(USER_DATA[sender_id][PROFILE]["first_name"],
+                                   USER_DATA[sender_id][PROFILE]["last_name"])
+    exam += "FB UserId: {}\n".format(sender_id)
+    exam += "Short story: {}\n".format(USER_DATA[sender_id][STORY])
+    exam += "Case description: {}: {}\n".format(lang["psychological"]["text"], USER_DATA[sender_id][PSYCHOLOGICAL])
+    exam += "Assessment: {}\n".format(USER_DATA[sender_id][PSYCHOLOGICAL_QA])
+
+    # Send examination
+    par = {
+        "chat_id": CHAT_ID,
+        "text": exam}
+    r = requests.get(url=URL + "/sendMessage", params=par)
 
     return
 
@@ -576,76 +666,36 @@ def medical_assessment(sender_id):
     if USER_DATA[sender_id][MEDICAL][MEDICAL_QA] == DONE:
         payload = lang["qa_finish"]
         send_message(sender_id, payload)
-        # Match questions and answers after assessment
-        exam = "A user requested medical help!\n\n"
-        exam += "Name: {} {}\n".format(USER_DATA[sender_id][PROFILE]["first_name"], USER_DATA[sender_id][PROFILE]["last_name"])
-        exam += "FB UserId: {}\n".format(sender_id)
-        exam += "Short story: {}\n".format(USER_DATA[sender_id][STORY])
 
-        for questions in lang["medical_assessment"]:
-            exam += "{}: {}\n".format(lang["medical_assessment"][questions]["text"], USER_DATA[sender_id][MEDICAL][questions])
-
-        #USER_DATA[sender_id][CURRENT_INTENT] = QA_FINISH
         USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL_WAIT
-        medical_case(sender_id, exam)
+        medical_case(sender_id)
 
     return
 
 
-def medical_case(sender_id, examination):
+def medical_case(sender_id):
     lang = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["medical_case"]
     send_message(sender_id, payload)
 
-    # Send facebook profile pic
-    par = {
-        "chat_id": CHAT_ID,
-        "photo": USER_DATA[sender_id][PROFILE]["profile_pic"],
-        "caption": "User Facebook Profile Pic"
-    }
-    r = requests.get(url=URL + "/sendPhoto", params=par)
-    # Prepare attachments
-    for attachment in USER_DATA[sender_id][ATTACHMENTS]:
-        if IMAGE in attachment:
-            par = {
-                "chat_id": CHAT_ID,
-                "photo": USER_DATA[sender_id][ATTACHMENTS][IMAGE]}
-            r = requests.get(url=URL + "/sendPhoto", params=par)
-        elif AUDIO in attachment:
-            par = {
-                "chat_id": CHAT_ID,
-                "audio": USER_DATA[sender_id][ATTACHMENTS][AUDIO]}
-            r = requests.get(url=URL + "/sendAudio", params=par)
-        elif VIDEO in attachment:
-            par = {
-                "chat_id": CHAT_ID,
-                "video": USER_DATA[sender_id][ATTACHMENTS][VIDEO]}
-            r = requests.get(url=URL + "/sendVideo", params=par)
+    # Send attachments
+    send_attachments(sender_id)
 
-        elif LOCATION in attachment:
-            try:
-                if "latitude" in USER_DATA[sender_id][ATTACHMENTS][LOCATION]:
-                    par = {
-                        "chat_id": CHAT_ID,
-                        "latitude": USER_DATA[sender_id][ATTACHMENTS][LOCATION]["latitude"],
-                        "longitude": USER_DATA[sender_id][ATTACHMENTS][LOCATION]["longitude"]
-                    }
-                    r = requests.get(url=URL + "/sendLocation", params=par)
-                else:
-                    par = {
-                        "chat_id": CHAT_ID,
-                        "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
-                    r = requests.get(url=URL + "/sendMessage", params=par)
-            except:
-                par = {
-                    "chat_id": CHAT_ID,
-                    "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
-                r = requests.get(url=URL + "/sendMessage", params=par)
+    # Match questions and answers after assessment
+    exam = "A user requested medical help!\n\n"
+    exam += "Name: {} {}\n".format(USER_DATA[sender_id][PROFILE]["first_name"],
+                                   USER_DATA[sender_id][PROFILE]["last_name"])
+    exam += "FB UserId: {}\n".format(sender_id)
+    exam += "Short story: {}\n".format(USER_DATA[sender_id][STORY])
+
+    for questions in lang["medical_assessment"]:
+        exam += "{}: {}\n".format(lang["medical_assessment"][questions]["text"],
+                                  USER_DATA[sender_id][MEDICAL][questions])
 
     # Send examination
     par = {
         "chat_id": CHAT_ID,
-        "text": examination}
+        "text": exam}
     r = requests.get(url=URL+"/sendMessage", params=par)
 
     return

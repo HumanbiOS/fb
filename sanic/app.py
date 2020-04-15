@@ -148,7 +148,14 @@ async def handle_message(request):
                             elif _attachment["type"] == "video":
                                 USER_DATA[sender_id][ATTACHMENTS][VIDEO] = _attachment["payload"]["url"]
                             elif _attachment["type"] == "location":
-                                USER_DATA[sender_id][ATTACHMENTS][LOCATION] = _attachment["payload"]["url"]
+                                try:
+                                    gps = _attachment["payload"]["url"]
+                                    a = gps.split('where1%3D')
+                                    b = a[1].split('%252C%2B')
+                                    c = b[1].split('%26FORM%')
+                                    USER_DATA[sender_id][ATTACHMENTS][LOCATION] = {"latitude": b[0], "longitude": c[0]}
+                                except:
+                                    USER_DATA[sender_id][ATTACHMENTS][LOCATION] = _attachment["payload"]["url"]
 
                         # Check if it is the beginning of a conversation
                         if USER_DATA[sender_id][START_OVER]:
@@ -616,10 +623,24 @@ def medical_case(sender_id, examination):
             r = requests.get(url=URL + "/sendVideo", params=par)
 
         elif LOCATION in attachment:
-            par = {
-                "chat_id": CHAT_ID,
-                "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
-            r = requests.get(url=URL + "/sendMessage", params=par)
+            try:
+                if "latitude" in USER_DATA[sender_id][ATTACHMENTS][LOCATION]:
+                    par = {
+                        "chat_id": CHAT_ID,
+                        "latitude": USER_DATA[sender_id][ATTACHMENTS][LOCATION]["latitude"],
+                        "longitude": USER_DATA[sender_id][ATTACHMENTS][LOCATION]["longitude"]
+                    }
+                    r = requests.get(url=URL + "/sendLocation", params=par)
+                else:
+                    par = {
+                        "chat_id": CHAT_ID,
+                        "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
+                    r = requests.get(url=URL + "/sendMessage", params=par)
+            except:
+                par = {
+                    "chat_id": CHAT_ID,
+                    "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
+                r = requests.get(url=URL + "/sendMessage", params=par)
 
     # Send examination
     par = {

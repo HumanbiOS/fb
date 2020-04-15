@@ -449,7 +449,8 @@ def send_attachments(sender_id):
     par = {
         "chat_id": CHAT_ID,
         "photo": USER_DATA[sender_id][PROFILE]["profile_pic"],
-        "caption": "User Facebook Profile Pic"
+        "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
+                                  USER_DATA[sender_id][PROFILE]["last_name"])
     }
     r = requests.get(url=URL + "/sendPhoto", params=par)
 
@@ -458,17 +459,27 @@ def send_attachments(sender_id):
         if IMAGE in attachment:
             par = {
                 "chat_id": CHAT_ID,
-                "photo": USER_DATA[sender_id][ATTACHMENTS][IMAGE]}
+                "photo": USER_DATA[sender_id][ATTACHMENTS][IMAGE],
+                "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
+                                          USER_DATA[sender_id][PROFILE]["last_name"])
+            }
+
             r = requests.get(url=URL + "/sendPhoto", params=par)
         elif AUDIO in attachment:
             par = {
                 "chat_id": CHAT_ID,
-                "audio": USER_DATA[sender_id][ATTACHMENTS][AUDIO]}
+                "audio": USER_DATA[sender_id][ATTACHMENTS][AUDIO],
+                "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
+                                          USER_DATA[sender_id][PROFILE]["last_name"])
+            }
             r = requests.get(url=URL + "/sendAudio", params=par)
         elif VIDEO in attachment:
             par = {
                 "chat_id": CHAT_ID,
-                "video": USER_DATA[sender_id][ATTACHMENTS][VIDEO]}
+                "video": USER_DATA[sender_id][ATTACHMENTS][VIDEO],
+                "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
+                                          USER_DATA[sender_id][PROFILE]["last_name"])
+            }
             r = requests.get(url=URL + "/sendVideo", params=par)
 
         elif LOCATION in attachment:

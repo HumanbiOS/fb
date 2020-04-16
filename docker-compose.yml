@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  fbbot: &fbbot
+    build:
+      context: .
+      dockerfile: ./compose/facebookbot/Dockerfile
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - USE_DOCKER=yes
+    ports:
+      - "8000:8000"
+    networks:
+      - facebook_bot
+    command: /start
+
+networks:
+  facebook_bot:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.12.0.1/24"

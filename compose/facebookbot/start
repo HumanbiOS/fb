@@ -1,0 +1,6 @@
+#!/bin/bash
+
+while true; do
+  echo "Re-starting facebook-bot"
+  python app.py
+done

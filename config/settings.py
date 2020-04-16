@@ -19,4 +19,9 @@ VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "")
 # Telegram bot
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 # Telegram channels
-FORWARDING_CHANNEL_ID = os.getenv("FORWARDING_CHANNEL_ID", "")
+DOCTORS_ROOM_TG = os.getenv("DOCTORS_ROOM_TG", "")
+PSYCHOLOGIST_ROOM_TG = os.getenv("PSYCHOLOGIST_ROOM_TG", "")
+HELPER_ROOM_TG = os.getenv("HELPER_ROOM_TG", "")
+
+# Webhook
+WEBHOOK = os.getenv("WEBHOOK", "")

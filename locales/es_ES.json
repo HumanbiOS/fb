@@ -93,6 +93,16 @@
 	"medical": {
 		"text": "Querido Humano, trataremos de ayudarte tanto como podamos. Este bot le hará una serie de preguntas ahora que le ayudarán a comprender su caso. El primero:"
 	},
+	"medical_wait": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Stop"
+			}
+		},
+		"text": "Estamos esperando que un médico se conecte con usted, sea paciente."
+	},
 	"medical_assessment": {
 		"Q1": {
 			"quick_replies": {
@@ -684,6 +694,16 @@
 	},
 	"psychological_case": {
 		"text": "¡Reenvió su solicitud a la habitación del psicólogo!"
+	},
+	"psychological_wait": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Stop"
+			}
+		},
+		"text": "Estamos esperando que un psicólogo se conecte con usted, sea paciente."
 	},
 	"psychological_found": {
 		"text": "Oye, encontramos un médico que puede ayudarte. Ahora está conectado a ellos, simplemente envíe sus mensajes aquí."

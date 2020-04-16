@@ -9,15 +9,10 @@ import time
 import json as js
 import requests
 
-from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
-from telegram import (InlineKeyboardMarkup, InlineKeyboardButton)
-from telegram import (KeyboardButton)
-from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
-                          ConversationHandler, CallbackQueryHandler)
-
 from sanic import Sanic
 from sanic.response import text, json
 from config import settings
+import bot
 
 # enable logging
 project_path = os.path.dirname(os.path.abspath(__file__))
@@ -41,7 +36,13 @@ VERIFY_TOKEN = settings.VERIFY_TOKEN
 
 # Use this section to Do API calls to push data wherever needed..in this case telegram channel
 URL = "https://api.telegram.org/bot" + settings.TELEGRAM_BOT_TOKEN
-FORWARDING_CHANNEL_ID = settings.FORWARDING_CHANNEL_ID
+# Set channel id's
+DOCTORS_ROOM_TG = settings.DOCTORS_ROOM_TG
+PSYCHOLOGIST_ROOM_TG = settings.PSYCHOLOGIST_ROOM_TG
+HELPER_ROOM_TG = settings.HELPER_ROOM_TG
+
+# Webhook url
+WEBHOOK = settings.WEBHOOK
 
 # USER_DATA handles all the messages coming from messenger
 USER_DATA = {}
@@ -77,6 +78,11 @@ MEDICAL_WAIT = "MEDICAL_WAIT"
 MEDICAL_FOUND = "MEDICAL_FOUND"
 MEDICAL_QA = "MEDICAL_QA"
 QA_FINISH = "QA_FINISH"
+WAIT_TIMER = "WAIT_TIMER"
+CONSULTATION = "CONSULTATION"
+CONSULTATION_FINISHED = "CONSULTATION_FINISHED"
+CONSULTANT = "CONSULTANT"
+CONSULTANT_REPLY = "CONSULTANT_REPLY"
 DONE = "DONE"
 CANCEL = "CANCEL"
 FINISH = "FINISH"
@@ -120,6 +126,18 @@ async def handle_message(request):
     # Handle messages sent by facebook messenger to the application
     data = request.json
     logger.info(data)
+
+    # Facebook message
+    if "object" in data:
+        handle_fb_message(data)
+    # Telegram message
+    elif "message" in data:
+        handle_tg_message(data)
+
+    return text("ok")
+
+
+def handle_fb_message(data):
     if data["object"] == "page":
         for entry in data["entry"]:
             for messaging_event in entry["messaging"]:
@@ -181,7 +199,10 @@ async def handle_message(request):
                         USER_DATA[sender_id][CURRENT_INTENT] = ATTACHMENTS
                         conversation_handler(sender_id)
 
-    return text("ok")
+
+def handle_tg_message(data):
+    payload = {"text": data["message"]["text"]}
+    send_message("3456769414338723", payload)
 
 
 def get_user_profile(sender_id):
@@ -195,6 +216,17 @@ def get_user_profile(sender_id):
     logger.info("New FB user - {}".format(USER_DATA[sender_id][PROFILE]))
 
     return json(r.content)
+
+
+def set_telegram_webhook():
+    par = {
+        "url": WEBHOOK
+    }
+    r = requests.get(url=URL + "/setWebhook", params=par)
+
+    logger.info(r.content)
+
+    return
 
 
 def send_message(sender_id, payload):
@@ -352,10 +384,15 @@ def conversation_handler(sender_id):
 
         # Do a psychological case assignment
         elif USER_DATA[sender_id][CURRENT_INTENT] == PSYCHOLOGICAL_WAIT:
-            USER_DATA[sender_id][PSYCHOLOGICAL_QA] = USER_DATA[sender_id][REPLY]
-            psychological_case(sender_id)
-            # Set the next intent for the conversation
-            USER_DATA[sender_id][CURRENT_INTENT] = PSYCHOLOGICAL_FOUND
+            # If there is no doctor connected, then continue to wait
+            if CONSULTATION in USER_DATA[sender_id]:
+                psychological_wait(sender_id)
+            else:
+                USER_DATA[sender_id][PSYCHOLOGICAL_QA] = USER_DATA[sender_id][REPLY]
+                psychological_case(sender_id)
+
+            # # Set the next intent for the conversation
+            # USER_DATA[sender_id][CURRENT_INTENT] = PSYCHOLOGICAL_FOUND
 
         # Chatting to the psychologist
         elif USER_DATA[sender_id][CURRENT_INTENT] == PSYCHOLOGICAL_FOUND:
@@ -368,17 +405,20 @@ def conversation_handler(sender_id):
         # Start medical examination
         elif USER_DATA[sender_id][CURRENT_INTENT] == MEDICAL:
             medical_assessment(sender_id)
-
-        # # Check if medical examination is done
-        # elif USER_DATA[sender_id][CURRENT_INTENT] == QA_FINISH:
-        #     # Set the next intent for the conversation
-        #     USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL_WAIT
+            # Do a medical case assignment
+            # Forward the info and assign a case
+            medical_case(sender_id)
+            # Set the next intent for the conversation
+            USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL_WAIT
 
         # Do a medical case assignment
         elif USER_DATA[sender_id][CURRENT_INTENT] == MEDICAL_WAIT:
+            # If there is no doctor connected, then continue to wait
+            if CONSULTATION in USER_DATA[sender_id]:
+                medical_wait(sender_id)
 
-            # Set the next intent for the conversation
-            USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL_FOUND
+            # # Set the next intent for the conversation
+            # USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL_FOUND
 
         # Chatting to the psychologist
         elif USER_DATA[sender_id][CURRENT_INTENT] == MEDICAL_FOUND:
@@ -453,10 +493,10 @@ def attachment(sender_id):
     return
 
 
-def send_attachments(sender_id):
+def send_attachments(sender_id, channel_id):
     # Send facebook profile pic
     par = {
-        "chat_id": FORWARDING_CHANNEL_ID,
+        "chat_id": channel_id,
         "photo": USER_DATA[sender_id][PROFILE]["profile_pic"],
         "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
                                   USER_DATA[sender_id][PROFILE]["last_name"])
@@ -467,7 +507,7 @@ def send_attachments(sender_id):
     for attachment in USER_DATA[sender_id][ATTACHMENTS]:
         if IMAGE in attachment:
             par = {
-                "chat_id": FORWARDING_CHANNEL_ID,
+                "chat_id": channel_id,
                 "photo": USER_DATA[sender_id][ATTACHMENTS][IMAGE],
                 "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
                                           USER_DATA[sender_id][PROFILE]["last_name"])
@@ -476,7 +516,7 @@ def send_attachments(sender_id):
             r = requests.get(url=URL + "/sendPhoto", params=par)
         elif AUDIO in attachment:
             par = {
-                "chat_id": FORWARDING_CHANNEL_ID,
+                "chat_id": channel_id,
                 "audio": USER_DATA[sender_id][ATTACHMENTS][AUDIO],
                 "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
                                           USER_DATA[sender_id][PROFILE]["last_name"])
@@ -484,7 +524,7 @@ def send_attachments(sender_id):
             r = requests.get(url=URL + "/sendAudio", params=par)
         elif VIDEO in attachment:
             par = {
-                "chat_id": FORWARDING_CHANNEL_ID,
+                "chat_id": channel_id,
                 "video": USER_DATA[sender_id][ATTACHMENTS][VIDEO],
                 "caption": "{} {}".format(USER_DATA[sender_id][PROFILE]["first_name"],
                                           USER_DATA[sender_id][PROFILE]["last_name"])
@@ -495,19 +535,19 @@ def send_attachments(sender_id):
             try:
                 if "latitude" in USER_DATA[sender_id][ATTACHMENTS][LOCATION]:
                     par = {
-                        "chat_id": FORWARDING_CHANNEL_ID,
+                        "chat_id": channel_id,
                         "latitude": USER_DATA[sender_id][ATTACHMENTS][LOCATION]["latitude"],
                         "longitude": USER_DATA[sender_id][ATTACHMENTS][LOCATION]["longitude"]
                     }
                     r = requests.get(url=URL + "/sendLocation", params=par)
                 else:
                     par = {
-                        "chat_id": FORWARDING_CHANNEL_ID,
+                        "chat_id": channel_id,
                         "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
                     r = requests.get(url=URL + "/sendMessage", params=par)
             except Exception as e:
                 par = {
-                    "chat_id": FORWARDING_CHANNEL_ID,
+                    "chat_id": channel_id,
                     "text": USER_DATA[sender_id][ATTACHMENTS][LOCATION]}
                 r = requests.get(url=URL + "/sendMessage", params=par)
 
@@ -552,7 +592,7 @@ def new_member_confirm(sender_id):
     send_message(sender_id, payload)
 
     # Send attachments
-    send_attachments(sender_id)
+    send_attachments(sender_id, HELPER_ROOM_TG)
 
     # Match questions and answers after assessment
     exam = "A user wants to help\n\n"
@@ -564,7 +604,7 @@ def new_member_confirm(sender_id):
 
     # # Send examination
     par = {
-        "chat_id": FORWARDING_CHANNEL_ID,
+        "chat_id": HELPER_ROOM_TG,
         "text": exam,
         "reply_markup": {"inline_keyboard": [[{"text": "Report User", "url": "https://facebook.com"}]]}
     }
@@ -605,7 +645,7 @@ def psychological_case(sender_id):
     send_message(sender_id, payload)
 
     # Send attachments
-    send_attachments(sender_id)
+    send_attachments(sender_id, PSYCHOLOGIST_ROOM_TG)
 
     # Match questions and answers after assessment
     exam = "A user wants to talk!\n\n"
@@ -618,7 +658,7 @@ def psychological_case(sender_id):
 
     # Send examination
     par = {
-        "chat_id": FORWARDING_CHANNEL_ID,
+        "chat_id": PSYCHOLOGIST_ROOM_TG,
         "text": exam,
         "reply_markup": {"inline_keyboard": [[{"text": "Assign Case to me", "url": "https://facebook.com"},
                                              {"text": "Report User", "url": "https://facebook.com"}]]}
@@ -626,6 +666,17 @@ def psychological_case(sender_id):
     r = requests.post(url=URL + "/sendMessage",
                       headers={"Content-Type": "application/json"},
                       data=js.dumps(par))
+
+    USER_DATA[sender_id][CONSULTATION] = {}
+    USER_DATA[sender_id][CONSULTATION][WAIT_TIMER] = time.time()
+
+    return
+
+
+def psychological_wait(sender_id):
+    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    payload = lang["psychological_wait"]
+    send_message(sender_id, payload)
 
     return
 
@@ -696,9 +747,6 @@ def medical_assessment(sender_id):
         payload = lang["qa_finish"]
         send_message(sender_id, payload)
 
-        USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL_WAIT
-        medical_case(sender_id)
-
     return
 
 
@@ -708,7 +756,7 @@ def medical_case(sender_id):
     send_message(sender_id, payload)
 
     # Send attachments
-    send_attachments(sender_id)
+    send_attachments(sender_id, DOCTORS_ROOM_TG)
 
     # Match questions and answers after assessment
     exam = "A user requested medical help!\n\n"
@@ -723,7 +771,7 @@ def medical_case(sender_id):
 
     # Send examination
     par = {
-        "chat_id": FORWARDING_CHANNEL_ID,
+        "chat_id": DOCTORS_ROOM_TG,
         "text": exam,
         "reply_markup": {"inline_keyboard": [[{"text": "Assign Case to me", "url": "https://facebook.com"},
                                              {"text": "Report User", "url": "https://facebook.com"}]]}
@@ -731,6 +779,17 @@ def medical_case(sender_id):
     r = requests.post(url=URL + "/sendMessage",
                       headers={"Content-Type": "application/json"},
                       data=js.dumps(par))
+
+    USER_DATA[sender_id][CONSULTATION] = {}
+    USER_DATA[sender_id][CONSULTATION][WAIT_TIMER] = time.time()
+
+    return
+
+
+def medical_wait(sender_id):
+    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    payload = lang["medical_wait"]
+    send_message(sender_id, payload)
 
     return
 
@@ -768,4 +827,5 @@ def bye(sender_id):
 
 
 if __name__ == '__main__':
+    set_telegram_webhook()
     app.run(port=5000, debug=False)

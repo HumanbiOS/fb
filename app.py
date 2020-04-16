@@ -83,6 +83,9 @@ CONSULTATION = "CONSULTATION"
 CONSULTATION_FINISHED = "CONSULTATION_FINISHED"
 CONSULTANT = "CONSULTANT"
 CONSULTANT_REPLY = "CONSULTANT_REPLY"
+CONSULTANT_LATEST = "CONSULTANT_LATEST"
+CHAT_INSTANCE = "CHAT_INSTANCE"
+CHAT_INSTANCE_LATEST = "CHAT_INSTANCE_LATEST"
 DONE = "DONE"
 CANCEL = "CANCEL"
 FINISH = "FINISH"
@@ -131,7 +134,7 @@ async def handle_message(request):
     if "object" in data:
         handle_fb_message(data)
     # Telegram message
-    elif "message" in data:
+    elif "update_id" in data:
         handle_tg_message(data)
 
     return text("ok")
@@ -177,6 +180,8 @@ def handle_fb_message(data):
                                 USER_DATA[sender_id][ATTACHMENTS][VIDEO] = _attachment["payload"]["url"]
                             elif _attachment["type"] == "location":
                                 try:
+                                    # Facebook sends a Bing URL as attachment for location
+                                    # Below is guess work, will add button functionality to extract lat/lon properly
                                     gps = _attachment["payload"]["url"]
                                     a = gps.split('where1%3D')
                                     b = a[1].split('%252C%2B')
@@ -201,8 +206,69 @@ def handle_fb_message(data):
 
 
 def handle_tg_message(data):
-    payload = {"text": data["message"]["text"]}
-    send_message("3456769414338723", payload)
+    if "message" in data:
+        consultant = data["message"]["from"]["id"]
+        reply = data["message"]["text"]
+
+        # Check for Commands
+        # Start of conversation
+        if "/start" in reply:
+            sender_id = reply.split()
+            sender_id = sender_id[1]
+
+            # Doctor has connected, let the user know
+            if USER_DATA:
+                USER_DATA[sender_id][CONSULTATION][CONSULTANT] = consultant
+                # Set the latest consultant that accepted the case for the user
+                USER_DATA[sender_id][CONSULTANT_LATEST] = consultant
+                # Check the current room the user is in, according to the user's latest intent
+                if USER_DATA[sender_id][CURRENT_INTENT] == PSYCHOLOGICAL_WAIT:
+                    USER_DATA[sender_id][CURRENT_INTENT] = PSYCHOLOGICAL_FOUND
+                    USER_DATA[sender_id][PSYCHOLOGICAL_FOUND] = True
+                    psychological_found(sender_id)
+                elif USER_DATA[sender_id][CURRENT_INTENT] == MEDICAL_WAIT:
+                    USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL_FOUND
+                    USER_DATA[sender_id][MEDICAL_FOUND] = True
+                    medical_found(sender_id)
+
+        # Doctor ended the conversation
+        elif "/stop" in reply:
+            # Find the correct user in the context
+            for sender_id in USER_DATA:
+                if CONSULTANT_LATEST in USER_DATA[sender_id]:
+                    if USER_DATA[sender_id][CONSULTANT_LATEST] == consultant:
+                        USER_DATA[sender_id][CONSULTATION][CONSULTANT_REPLY] = reply
+                        payload = {"text": "Doctor has ended the conversation."}
+                        send_message(sender_id, payload)
+                        USER_DATA[sender_id][CURRENT_INTENT] = FINISH
+
+        # Chat in progress
+        else:
+            # Find the correct user in the context
+            for sender_id in USER_DATA:
+                if CONSULTANT_LATEST in USER_DATA[sender_id]:
+                    if USER_DATA[sender_id][CONSULTANT_LATEST] == consultant:
+                        USER_DATA[sender_id][CONSULTATION][CONSULTANT_REPLY] = reply
+                        payload = {"text": reply}
+                        send_message(sender_id, payload)
+
+    elif "callback_query" in data:
+        # Answer the callback_query
+        par = {
+            "callback_query_id": data["callback_query"]["id"],
+            "url": "https://t.me/humanbios_test_bot",
+            "text": "accepting {}".format(data["callback_query"]["data"])
+        }
+        r = requests.post(url=URL + "/answerCallbackQuery",
+                          headers={"Content-Type": "application/json"},
+                          data=js.dumps(par))
+
+        sender_id = data["callback_query"]["data"]
+        if sender_id in USER_DATA:
+            payload = {"text": "Your data has been reported, we'll get back to you. Goodbye."}
+            send_message(sender_id, payload)
+            # Clear all user data
+            USER_DATA.pop(sender_id)
 
 
 def get_user_profile(sender_id):
@@ -246,6 +312,16 @@ def send_message(sender_id, payload):
     logger.info("response sent - {}".format(time.monotonic()))
 
     return json(r.content)
+
+
+def send_message_to_telegram(user_id, payload):
+    par = {
+        "chat_id": user_id,
+        "text": payload
+    }
+    r = requests.get(url=URL + "/sendMessage", params=par)
+
+    return
 
 
 def conversation_handler(sender_id):
@@ -387,46 +463,40 @@ def conversation_handler(sender_id):
             # If there is no doctor connected, then continue to wait
             if CONSULTATION in USER_DATA[sender_id]:
                 psychological_wait(sender_id)
+                if time.time() - USER_DATA[sender_id][CONSULTATION][WAIT_TIMER] > 15*60:
+                    user_waiting(sender_id, PSYCHOLOGIST_ROOM_TG)
+
             else:
                 USER_DATA[sender_id][PSYCHOLOGICAL_QA] = USER_DATA[sender_id][REPLY]
                 psychological_case(sender_id)
 
-            # # Set the next intent for the conversation
-            # USER_DATA[sender_id][CURRENT_INTENT] = PSYCHOLOGICAL_FOUND
-
         # Chatting to the psychologist
         elif USER_DATA[sender_id][CURRENT_INTENT] == PSYCHOLOGICAL_FOUND:
-            USER_DATA[sender_id][PSYCHOLOGICAL_FOUND] = True
-            psychological_found(sender_id)
-
-            # Set the next intent for the conversation
-            USER_DATA[sender_id][CURRENT_INTENT] = FINISH
+            send_message_to_telegram(USER_DATA[sender_id][CONSULTATION][CONSULTANT], USER_DATA[sender_id][REPLY])
 
         # Start medical examination
         elif USER_DATA[sender_id][CURRENT_INTENT] == MEDICAL:
             medical_assessment(sender_id)
-            # Do a medical case assignment
-            # Forward the info and assign a case
-            medical_case(sender_id)
-            # Set the next intent for the conversation
-            USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL_WAIT
+
+            # Check if the assessment is complete
+            if USER_DATA[sender_id][MEDICAL][MEDICAL_QA] == DONE:
+                # Do a medical case assignment
+                # Forward the info and assign a case
+                medical_case(sender_id)
+                # Set the next intent for the conversation
+                USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL_WAIT
 
         # Do a medical case assignment
         elif USER_DATA[sender_id][CURRENT_INTENT] == MEDICAL_WAIT:
             # If there is no doctor connected, then continue to wait
             if CONSULTATION in USER_DATA[sender_id]:
                 medical_wait(sender_id)
-
-            # # Set the next intent for the conversation
-            # USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL_FOUND
+                if time.time() - USER_DATA[sender_id][CONSULTATION][WAIT_TIMER] > 15*60:
+                    user_waiting(sender_id, DOCTORS_ROOM_TG)
 
         # Chatting to the psychologist
         elif USER_DATA[sender_id][CURRENT_INTENT] == MEDICAL_FOUND:
-            USER_DATA[sender_id][MEDICAL_FOUND] = True
-            medical_found(sender_id)
-
-            # Set the next intent for the conversation
-            USER_DATA[sender_id][CURRENT_INTENT] = FINISH
+            send_message_to_telegram(USER_DATA[sender_id][CONSULTATION][CONSULTANT], USER_DATA[sender_id][REPLY])
 
         # Cancelled the Conversation
         elif USER_DATA[sender_id][CURRENT_INTENT] == CANCEL:
@@ -481,6 +551,18 @@ def media(sender_id):
     lang = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["media"]
     send_message(sender_id, payload)
+
+    return
+
+
+def user_waiting(sender_id, channel_id):
+    par = {
+        "chat_id": channel_id,
+        "text": "User {} {} ({}) is waiting for > 15 minutes!".format(USER_DATA[sender_id][PROFILE]["first_name"],
+                                                                       USER_DATA[sender_id][PROFILE]["last_name"],
+                                                                       sender_id)
+    }
+    r = requests.get(url=URL + "/sendMessage", params=par)
 
     return
 
@@ -602,7 +684,7 @@ def new_member_confirm(sender_id):
     exam += "Short story: {}\n".format(USER_DATA[sender_id][STORY])
     exam += "Case description: {}\n".format(USER_DATA[sender_id][NEW_MEMBER])
 
-    # # Send examination
+    # Send info
     par = {
         "chat_id": HELPER_ROOM_TG,
         "text": exam,
@@ -660,8 +742,9 @@ def psychological_case(sender_id):
     par = {
         "chat_id": PSYCHOLOGIST_ROOM_TG,
         "text": exam,
-        "reply_markup": {"inline_keyboard": [[{"text": "Assign Case to me", "url": "https://facebook.com"},
-                                             {"text": "Report User", "url": "https://facebook.com"}]]}
+        "reply_markup": {"inline_keyboard": [[{"text": "Assign Case to me",
+                                               "url": "https://t.me/humanbios_test_bot?start={}".format(sender_id)},
+                                             {"text": "Report User", "callback_data": sender_id}]]}
     }
     r = requests.post(url=URL + "/sendMessage",
                       headers={"Content-Type": "application/json"},
@@ -773,8 +856,9 @@ def medical_case(sender_id):
     par = {
         "chat_id": DOCTORS_ROOM_TG,
         "text": exam,
-        "reply_markup": {"inline_keyboard": [[{"text": "Assign Case to me", "url": "https://facebook.com"},
-                                             {"text": "Report User", "url": "https://facebook.com"}]]}
+        "reply_markup": {"inline_keyboard": [[{"text": "Assign Case to me",
+                                               "url": "https://t.me/humanbios_test_bot?start={}".format(sender_id)},
+                                             {"text": "Report User", "callback_data": sender_id}]]}
     }
     r = requests.post(url=URL + "/sendMessage",
                       headers={"Content-Type": "application/json"},

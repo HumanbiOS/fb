@@ -208,42 +208,67 @@ def handle_fb_message(data):
 
 def handle_tg_message(data):
     if "message" in data:
-        consultant = data["message"]["from"]["id"]
-        reply = data["message"]["text"]
+        # Handle text messages from TG
+        if "text" in data["message"]:
+            consultant = data["message"]["from"]["id"]
+            reply = data["message"]["text"]
 
-        # Check for Commands
-        # Start of conversation
-        if "/start" in reply:
-            try:
-                sender_id = reply.split()
-                sender_id = sender_id[1]
+            # Check for Commands
+            # Start of conversation
+            if "/start" in reply:
+                try:
+                    sender_id = reply.split()
+                    sender_id = sender_id[1]
 
-                print(sender_id)
+                    print(sender_id)
 
-                # Doctor has connected, let the user know
-                if USER_DATA:
-                    USER_DATA[sender_id][CONSULTATION][CONSULTANT] = consultant
-                    # Set the latest consultant that accepted the case for the user
-                    USER_DATA[sender_id][CONSULTANT_LATEST] = consultant
-                    # Check the current room the user is in, according to the user's latest intent
-                    if USER_DATA[sender_id][CURRENT_INTENT] == PSYCHOLOGICAL_WAIT:
-                        USER_DATA[sender_id][CURRENT_INTENT] = PSYCHOLOGICAL_FOUND
-                        USER_DATA[sender_id][PSYCHOLOGICAL_FOUND] = True
-                        psychological_found(sender_id)
-                    elif USER_DATA[sender_id][CURRENT_INTENT] == MEDICAL_WAIT:
-                        USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL_FOUND
-                        USER_DATA[sender_id][MEDICAL_FOUND] = True
-                        medical_found(sender_id)
+                    # Doctor has connected, let the user know
+                    if USER_DATA:
+                        USER_DATA[sender_id][CONSULTATION][CONSULTANT] = consultant
+                        # Set the latest consultant that accepted the case for the user
+                        USER_DATA[sender_id][CONSULTANT_LATEST] = consultant
+                        # Check the current room the user is in, according to the user's latest intent
+                        if USER_DATA[sender_id][CURRENT_INTENT] == PSYCHOLOGICAL_WAIT:
+                            USER_DATA[sender_id][CURRENT_INTENT] = PSYCHOLOGICAL_FOUND
+                            USER_DATA[sender_id][PSYCHOLOGICAL_FOUND] = True
+                            psychological_found(sender_id)
+                        elif USER_DATA[sender_id][CURRENT_INTENT] == MEDICAL_WAIT:
+                            USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL_FOUND
+                            USER_DATA[sender_id][MEDICAL_FOUND] = True
+                            medical_found(sender_id)
 
-                # Doctor cannot have one-on-one conversations with multiple-users
-                # If doctor accepts a new case, then end the conversation with the other users
-                for user in USER_DATA:
-                    if CONSULTANT_LATEST in USER_DATA[user]:
-                        # Skip for current accepted user
+                    # Doctor cannot have one-on-one conversations with multiple-users
+                    # If doctor accepts a new case, then end the conversation with the other users
+                    for user in USER_DATA:
+                        if CONSULTANT_LATEST in USER_DATA[user]:
+                            # Skip for current accepted user
+                            if USER_DATA[sender_id][CONSULTANT_LATEST] == consultant:
+                                continue
+                            # For the rest of the users, let them know the doctor has left
+                            if USER_DATA[user][CONSULTANT_LATEST] == consultant:
+                                payload = {"text": "Doctor has ended the conversation."}
+                                send_message(sender_id, payload)
+                                # Clear the consultation section in the context
+                                USER_DATA[sender_id].pop(CONSULTANT_LATEST)
+                                USER_DATA[sender_id].pop(CONSULTATION)
+                                # Let the user start over
+                                USER_DATA[sender_id][CURRENT_INTENT] = FINISH
+                            # This will not be reached, but it is there anyway
+                            else:
+                                payload = "The user has left the room."
+                                send_message_to_telegram(consultant, payload)
+                # If TG user press the same /start command twice in the assigned case
+                except Exception as e:
+                    payload = "Please use the start command only once per acceptance."
+                    send_message_to_telegram(consultant, payload)
+
+            # Doctor ended the conversation
+            elif "/stop" in reply:
+                # Find the correct user in the context
+                for sender_id in USER_DATA:
+                    if CONSULTANT_LATEST in USER_DATA[sender_id]:
                         if USER_DATA[sender_id][CONSULTANT_LATEST] == consultant:
-                            continue
-                        # For the rest of the users, let them know the doctor has left
-                        if USER_DATA[user][CONSULTANT_LATEST] == consultant:
+                            USER_DATA[sender_id][CONSULTATION][CONSULTANT_REPLY] = reply
                             payload = {"text": "Doctor has ended the conversation."}
                             send_message(sender_id, payload)
                             # Clear the consultation section in the context
@@ -251,64 +276,41 @@ def handle_tg_message(data):
                             USER_DATA[sender_id].pop(CONSULTATION)
                             # Let the user start over
                             USER_DATA[sender_id][CURRENT_INTENT] = FINISH
-                        # This will not be reached, but it is there anyway
-                        else:
-                            payload = "The user has left the room."
-                            send_message_to_telegram(consultant, payload)
-            # If TG user press the same /start command twice in the assigned case
-            except Exception as e:
-                payload = "Please use the start command only once per acceptance."
-                send_message_to_telegram(consultant, payload)
 
-        # Doctor ended the conversation
-        elif "/stop" in reply:
-            # Find the correct user in the context
-            for sender_id in USER_DATA:
-                if CONSULTANT_LATEST in USER_DATA[sender_id]:
-                    if USER_DATA[sender_id][CONSULTANT_LATEST] == consultant:
-                        USER_DATA[sender_id][CONSULTATION][CONSULTANT_REPLY] = reply
-                        payload = {"text": "Doctor has ended the conversation."}
-                        send_message(sender_id, payload)
-                        # Clear the consultation section in the context
-                        USER_DATA[sender_id].pop(CONSULTANT_LATEST)
-                        USER_DATA[sender_id].pop(CONSULTATION)
-                        # Let the user start over
-                        USER_DATA[sender_id][CURRENT_INTENT] = FINISH
+            # Chat in progress
+            else:
+                # Find the correct user in the context
+                _user_is_there = False
+                for sender_id in USER_DATA:
+                    if CONSULTANT_LATEST in USER_DATA[sender_id]:
+                        if USER_DATA[sender_id][CONSULTANT_LATEST] == consultant:
+                            _user_is_there = True
+                            USER_DATA[sender_id][CONSULTATION][CONSULTANT_REPLY] = reply
+                            payload = {"text": reply}
+                            send_message(sender_id, payload)
+                if _user_is_there is False:
+                    payload = "The user has left the room."
+                    send_message_to_telegram(consultant, payload)
 
-        # Chat in progress
-        else:
-            # Find the correct user in the context
-            _user_is_there = False
-            for sender_id in USER_DATA:
-                if CONSULTANT_LATEST in USER_DATA[sender_id]:
-                    if USER_DATA[sender_id][CONSULTANT_LATEST] == consultant:
-                        _user_is_there = True
-                        USER_DATA[sender_id][CONSULTATION][CONSULTANT_REPLY] = reply
-                        payload = {"text": reply}
-                        send_message(sender_id, payload)
-            if _user_is_there is False:
-                payload = "The user has left the room."
-                send_message_to_telegram(consultant, payload)
+        elif "callback_query" in data:
+            # Answer the callback_query
+            par = {
+                "callback_query_id": data["callback_query"]["id"],
+                "text": "reporting {}. Thank you for the report.".format(data["callback_query"]["data"]),
+                "show_alert": True
+            }
+            r = requests.post(url=URL + "/answerCallbackQuery",
+                              headers={"Content-Type": "application/json"},
+                              data=js.dumps(par))
 
-    elif "callback_query" in data:
-        # Answer the callback_query
-        par = {
-            "callback_query_id": data["callback_query"]["id"],
-            "text": "reporting {}. Thank you for the report.".format(data["callback_query"]["data"]),
-            "show_alert": True
-        }
-        r = requests.post(url=URL + "/answerCallbackQuery",
-                          headers={"Content-Type": "application/json"},
-                          data=js.dumps(par))
+            logger.info(r.json())
 
-        logger.info(r.json())
-
-        sender_id = data["callback_query"]["data"]
-        if sender_id in USER_DATA:
-            payload = {"text": "Your data has been reported, we'll get back to you. Goodbye."}
-            send_message(sender_id, payload)
-            # Clear all user data
-            USER_DATA.pop(sender_id)
+            sender_id = data["callback_query"]["data"]
+            if sender_id in USER_DATA:
+                payload = {"text": "Your data has been reported, we'll get back to you. Goodbye."}
+                send_message(sender_id, payload)
+                # Clear all user data
+                USER_DATA.pop(sender_id)
 
 
 def get_user_profile(sender_id):

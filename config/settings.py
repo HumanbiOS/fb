@@ -17,6 +17,7 @@ dotenv.load_dotenv(env_path)
 PAT = os.getenv("PAT", "")
 VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "")
 # Telegram bot
+TELEGRAM_BOT_NAME = os.getenv("TELEGRAM_BOT_NAME", "")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 # Telegram channels
 DOCTORS_ROOM_TG = os.getenv("DOCTORS_ROOM_TG", "")

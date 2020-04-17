@@ -35,6 +35,7 @@ PAT = settings.PAT
 VERIFY_TOKEN = settings.VERIFY_TOKEN
 
 # Use this section to Do API calls to push data wherever needed..in this case telegram channel
+TELEGRAM_BOT_NAME = settings.TELEGRAM_BOT_NAME
 URL = "https://api.telegram.org/bot" + settings.TELEGRAM_BOT_TOKEN
 # Set channel id's
 DOCTORS_ROOM_TG = settings.DOCTORS_ROOM_TG
@@ -727,7 +728,7 @@ def new_member_confirm(sender_id):
     par = {
         "chat_id": HELPER_ROOM_TG,
         "text": exam,
-        "reply_markup": {"inline_keyboard": [[{"text": "Report User", "url": "https://facebook.com"}]]}
+        "reply_markup": {"inline_keyboard": [[{"text": "Report User", "callback_data": sender_id}]]}
     }
     r = requests.post(url=URL + "/sendMessage",
                       headers={"Content-Type": "application/json"},
@@ -782,7 +783,7 @@ def psychological_case(sender_id):
         "chat_id": PSYCHOLOGIST_ROOM_TG,
         "text": exam,
         "reply_markup": {"inline_keyboard": [[{"text": "Assign Case to me",
-                                               "url": "https://t.me/humanbios_test_bot?start={}".format(sender_id)},
+                                               "url": "https://t.me/{}?start={}".format(TELEGRAM_BOT_NAME, sender_id)},
                                              {"text": "Report User", "callback_data": sender_id}]]}
     }
     r = requests.post(url=URL + "/sendMessage",
@@ -896,7 +897,7 @@ def medical_case(sender_id):
         "chat_id": DOCTORS_ROOM_TG,
         "text": exam,
         "reply_markup": {"inline_keyboard": [[{"text": "Assign Case to me",
-                                               "url": "https://t.me/humanbios_test_bot?start={}".format(sender_id)},
+                                               "url": "https://t.me/{}?start={}".format(TELEGRAM_BOT_NAME, sender_id)},
                                              {"text": "Report User", "callback_data": sender_id}]]}
     }
     r = requests.post(url=URL + "/sendMessage",

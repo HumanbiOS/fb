@@ -1,6 +1,16 @@
 # HumanBios facebook frontend
 This repo creates a facebook messenger bot using the [Sanic](https://sanic.readthedocs.io/en/latest/) framework. The messenger bot interacts with a [Telegram](https://telegram.org/) bot using webhooks. These webhooks ultimately acts as a gateway between facebook messenger and telegram. 
 
+#### Specification
+
+https://hackmd.io/p0vKHdtAR4C1ygXadeTncA?view
+
+Once the user follows a specific conversation path by the use of **intents**, user gets connected to a corresponding telegram channel.
+
+- medical-room
+- pyschologist
+- room for new members
+
 ## Getting started
 Here is how to get a test platform running:
 
@@ -41,3 +51,11 @@ At the moment the telegram back-end of app.py runs through the same webhook url 
 `pip install django-environ`
 
 `pip install sanic`
+
+## Docker
+This repo is also using a docker container (with a poetry-environment inside)
+
+1. Build the container with `docker-compose build`
+2. Set the environment variables in the `.env` file (see: `.env.example`) 
+3. Start with `docker-compose up`
+

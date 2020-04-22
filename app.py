@@ -12,7 +12,6 @@ import requests
 from sanic import Sanic
 from sanic.response import text, json
 from config import settings
-import bot
 
 # enable logging
 project_path = os.path.dirname(os.path.abspath(__file__))

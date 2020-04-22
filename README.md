@@ -1,12 +1,6 @@
 # HumanBios facebook frontend
 This repo creates a facebook messenger bot using the [Sanic](https://sanic.readthedocs.io/en/latest/) framework. The messenger bot interacts with a [Telegram](https://telegram.org/) bot using webhooks. These webhooks ultimately acts as a gateway between facebook messenger and telegram. 
 
-```mermaid
-graph TD
-A[app.py] -- webhook url --> B(Facebook Messenger)
-A -- webhook url --> C(Telegram)
-```
-
 ## Getting started
 Here is how to get a test platform running:
 

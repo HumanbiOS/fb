@@ -1,6 +1,12 @@
 # HumanBios facebook frontend
 This repo creates a facebook messenger bot using the [Sanic](https://sanic.readthedocs.io/en/latest/) framework. The messenger bot interacts with a [Telegram](https://telegram.org/) bot using webhooks. These webhooks ultimately acts as a gateway between facebook messenger and telegram. 
 
+```mermaid
+graph TD
+A[app.py] -- webhook url --> B(Facebook Messenger)
+A -- webhook url --> C(Telegram)
+```
+
 ## Getting started
 Here is how to get a test platform running:
 
@@ -24,7 +30,7 @@ We assume you already have a facebook page created under your facebook account. 
 15. Create a webhook callback url. Copy the same tunneling url created by **ngrok** to "Callback URL" in facebook dev. 
 16. Copy the same VERIFY_TOKEN string in **.env** to "Verify Token" in facebook dev.
 17. First run the messenger bot
-18. Click "Verify and Save". If you've setup all the above successfully provided the **app.py** is running and your **ngrok** tunneling is forwarding to the correct ports. 
+18. Click "Verify and Save". If you've setup all the above successfully the app should function correctly, provided the **app.py** is running and your **ngrok** tunneling is forwarding to the correct ports. 
 
 ### Telegram back-end
 At the moment the telegram back-end of app.py runs through the same webhook url you've setup in **ngrok**. These the steps to get the telegram bot backend going for the facebook messenger bot:
@@ -33,3 +39,4 @@ At the moment the telegram back-end of app.py runs through the same webhook url 
 2. Copy the bot token to **.env** file. 
 3. Setup a test telegram channel and add the channel_id to the specific room's in the **.env** file. A single channel id will serve all the rooms, please do not leave the _ROOM_ variables empty.
 4. Restart app.py
+

@@ -101,7 +101,7 @@
 				"title": "Stop"
 			}
 		},
-		"text": "We are waiting for a Doctor to connect with you, please be patient."
+		"text": "We will get back to you, please be patient."
 	},
 	"medical_assessment": {
 		"Q1": {
@@ -646,7 +646,7 @@
 		"text": "Are you looking for medical assistance? If you would just like to talk to someone press no."
 	},
 	"new_member_confirm": {
-		"text": "Forwarded your request to the new members' room!"
+		"text": "Thank you, we will get back to you soon."
 	},
 	"new_member_info": {
 		"text": "Welcome new member. We are so glad you’re here! Please provide a short description of what you would like to help with and what you can do. Keep it brief and professional"
@@ -693,7 +693,7 @@
 		"text": "Please tell us a little about your current situation. How are you feeling? Are you afraid? Take a minute to relax and breath. Tell us also about your friends and family"
 	},
 	"psychological_case": {
-		"text": "Forwarded your request to the psychologist's room!"
+		"text": "We will send you recommendations of what you can do to stay safe&healthy soon"
 	},
 	"psychological_wait": {
 		"quick_replies": {
@@ -703,16 +703,16 @@
 				"title": "Stop"
 			}
 		},
-		"text": "We are waiting for a Psychologist to connect with you, please be patient."
+		"text": "We will get back to you, please be patient."
 	},
 	"psychological_found": {
-		"text": "Hey, we found a doctor who can help you. You are now connected to them - simply send your messages in here."
+		"text": "Hey, we found someone who can help you. You are now connected to them - simply send your messages in here."
 	},
 	"medical_case": {
-		"text": "Forwarded your request to the doctors room!"
+		"text": "We will send you recommendations of what you can do to stay safe&healthy soon"
 	},
 	"medical_found": {
-		"text": "Hey, we found a doctor who can help you. You are now connected to them - simply send your messages in here."
+		"text": "Hey, we found someone who can help you. You are now connected to them - simply send your messages in here."
 	},
 	"qa_finish": {
 		"text": "Finish"

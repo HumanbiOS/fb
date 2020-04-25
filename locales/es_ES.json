@@ -101,7 +101,7 @@
 				"title": "Stop"
 			}
 		},
-		"text": "Estamos esperando que un médico se conecte con usted, sea paciente."
+		"text": "Nos pondremos en contacto con usted, tenga paciencia."
 	},
 	"medical_assessment": {
 		"Q1": {
@@ -646,7 +646,7 @@
 		"text": "¿Estás buscando asistencia médica? Si solo desea hablar con alguien, presione no."
 	},
 	"new_member_confirm": {
-		"text": "¡Reenvió su solicitud a la sala de nuevos miembros!"
+		"text": "Gracias, nos pondremos en contacto con usted pronto."
 	},
 	"new_member_info": {
 		"text": "Bienvenido nuevo miembro. ¡Estamos muy contentos de que estés aquí! Proporcione una breve descripción de lo que le gustaría ayudar y lo que puede hacer. Mantenlo breve y profesional"
@@ -693,7 +693,7 @@
 		"text": "Cuéntanos un poco sobre tu situación actual. ¿Como te sientes? ¿Tienes miedo? Tómese un minuto para relajarse y respirar. Cuéntanos también sobre tus amigos y familiares"
 	},
 	"psychological_case": {
-		"text": "¡Reenvió su solicitud a la habitación del psicólogo!"
+		"text": "Le enviaremos recomendaciones de lo que puede hacer para mantenerse seguro y saludable pronto"
 	},
 	"psychological_wait": {
 		"quick_replies": {
@@ -703,16 +703,16 @@
 				"title": "Stop"
 			}
 		},
-		"text": "Estamos esperando que un psicólogo se conecte con usted, sea paciente."
+		"text": "Nos pondremos en contacto con usted, tenga paciencia."
 	},
 	"psychological_found": {
-		"text": "Oye, encontramos un médico que puede ayudarte. Ahora está conectado a ellos, simplemente envíe sus mensajes aquí."
+		"text": "Oye, encontramos a alguien que puede ayudarte. Ahora está conectado a ellos, simplemente envíe sus mensajes aquí."
 	},
 	"medical_case": {
-		"text": "¡Reenvió su solicitud a la sala de médicos!"
+		"text": "Le enviaremos recomendaciones de lo que puede hacer para mantenerse seguro y saludable pronto"
 	},
 	"medical_found": {
-		"text": "Oye, encontramos un médico que puede ayudarte. Ahora está conectado a ellos, simplemente envíe sus mensajes aquí."
+		"text": "Oye, encontramos a alguien que puede ayudarte. Ahora está conectado a ellos, simplemente envíe sus mensajes aquí."
 	},
 	"qa_finish": {
 		"text": "Terminar"

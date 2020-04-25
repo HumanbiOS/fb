@@ -12,7 +12,9 @@ services:
     environment:
       - USE_DOCKER=yes
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8443:8443"
+    expose:
+      - "8443"
     networks:
       - facebook_bot
     command: /start

@@ -12,6 +12,7 @@ import requests
 from sanic import Sanic
 from sanic.response import text, json
 from config import settings
+from modules.qa_module.methods import get_next_question
 
 # enable logging
 project_path = os.path.dirname(os.path.abspath(__file__))
@@ -813,12 +814,58 @@ def psychological_found(sender_id):
     return
 
 
+def payload_prepare(response):
+    if "answers" in response:
+        # This will build a quick_reply dict to be sent back to facebook
+        answers = response["answers"]
+        quick_replies = {}
+        i = 0
+        try:
+            for key, values in answers.items():
+                quick_replies[str(i)] = {
+                    "content_type": "text",
+                    "payload": "<POSTBACK_PAYLOAD>",
+                    "title": key
+                }
+                i += 1
+            # Add command at the end
+            quick_replies[str(i)] = {
+                "content_type": "text",
+                "payload": "<POSTBACK_PAYLOAD>",
+                "title": "Stop"
+            }
+            payload = {"text": response["text"], "quick_replies": quick_replies}
+        except Exception as e:
+            payload = {"text": response["text"]}
+
+    else:
+        payload = {"text": response["text"]}
+
+    return payload
+
+
+def check_answer(response, answer):
+    if "answers" in response:
+        try:
+            if answer in response["answers"]:
+                return response["answers"][answer], False
+        except Exception as e:
+            return response["answers"], False
+    else:
+        return None, False
+
+
 def medical(sender_id):
     lang = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["medical"]
     send_message(sender_id, payload)
 
-    payload = lang["medical_assessment"]["Q1"]
+    # payload = lang["medical_assessment"]["Q1"]
+    # send_message(sender_id, payload)
+
+    # P0 is the entry point for Q&A
+    response = get_next_question(sender_id, "en", "P0")
+    payload = payload_prepare(eval(repr(response)))
     send_message(sender_id, payload)
 
     return
@@ -836,40 +883,72 @@ def medical_assessment(sender_id):
 
     lang = choose_language(USER_DATA[sender_id][LANGUAGE])
 
+    # # Add the MEDICAL key if it does not exist
+    # if MEDICAL not in USER_DATA[sender_id]:
+    #     USER_DATA[sender_id][MEDICAL] = {}
+    #     USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = "Q1"
+    #
+    # for i in range(len(QA)):
+    #     # Command handler
+    #     if USER_DATA[sender_id][REPLY] == "Stop":
+    #         # Set the next intent for the conversation
+    #         USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
+    #         USER_DATA[sender_id][CURRENT_INTENT] = CANCEL
+    #         break
+    #
+    #     # Check if the last question was answered
+    #     if QA[i] == QA[len(QA)-1]:
+    #         # Record answer
+    #         USER_DATA[sender_id][MEDICAL][QA[i]] = USER_DATA[sender_id][REPLY]
+    #         # Set the next intent for the conversation
+    #         USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
+    #         break
+    #
+    #     # Continue with examination
+    #     elif USER_DATA[sender_id][MEDICAL][MEDICAL_QA] == QA[i]:
+    #         # Record answer
+    #         USER_DATA[sender_id][MEDICAL][QA[i]] = USER_DATA[sender_id][REPLY]
+    #         # Set the next intent for the conversation
+    #         USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = QA[i+1]
+    #         payload = lang["medical_assessment"][QA[i+1]]
+    #         send_message(sender_id, payload)
+    #         break
+
     # Add the MEDICAL key if it does not exist
     if MEDICAL not in USER_DATA[sender_id]:
         USER_DATA[sender_id][MEDICAL] = {}
-        USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = "Q1"
+        USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = "P0"
 
-    for i in range(len(QA)):
-        # Command handler
-        if USER_DATA[sender_id][REPLY] == "Stop":
-            # Set the next intent for the conversation
-            USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
-            USER_DATA[sender_id][CURRENT_INTENT] = CANCEL
-            break
-
-        # Check if the last question was answered
-        if QA[i] == QA[len(QA)-1]:
-            # Record answer
-            USER_DATA[sender_id][MEDICAL][QA[i]] = USER_DATA[sender_id][REPLY]
-            # Set the next intent for the conversation
-            USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
-            break
-
-        # Continue with examination
-        elif USER_DATA[sender_id][MEDICAL][MEDICAL_QA] == QA[i]:
-            # Record answer
-            USER_DATA[sender_id][MEDICAL][QA[i]] = USER_DATA[sender_id][REPLY]
-            # Set the next intent for the conversation
-            USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = QA[i+1]
-            payload = lang["medical_assessment"][QA[i+1]]
-            send_message(sender_id, payload)
-            break
-
-    if USER_DATA[sender_id][MEDICAL][MEDICAL_QA] == DONE:
+    # Command handler
+    if USER_DATA[sender_id][REPLY] == "Stop":
+        # Set the next intent for the conversation
+        USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
+        USER_DATA[sender_id][CURRENT_INTENT] = CANCEL
         payload = lang["qa_finish"]
         send_message(sender_id, payload)
+
+        return
+
+    else:
+        # Record answer
+        current_question = USER_DATA[sender_id][MEDICAL][MEDICAL_QA]
+        USER_DATA[sender_id][MEDICAL][current_question] = USER_DATA[sender_id][REPLY]
+        # Check what the next question should be
+        response = get_next_question(sender_id, "en", current_question)
+        print(eval(repr(response)))
+        next_question, end = check_answer(eval(repr(response)), USER_DATA[sender_id][MEDICAL][current_question])
+        print(next_question)
+        USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = next_question
+        if not end:
+            if next_question is not None:
+                response = get_next_question(sender_id, "en", next_question)
+                payload = payload_prepare(eval(repr(response)))
+                send_message(sender_id, payload)
+        else:
+            # Set the next intent for the conversation
+            USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
+            payload = lang["qa_finish"]
+            send_message(sender_id, payload)
 
     return
 

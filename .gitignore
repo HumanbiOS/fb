@@ -1,2 +1,7 @@
 /logs/bot.log
 /.env
+/modules/QA-module/.idea/
+/modules/QA-module/covapp/
+/modules/QA-module/.gitignore
+/modules/QA-module/.gitmodules
+/modules/QA-module/__init__.py

@@ -104,9 +104,10 @@ _es_ES = js.loads(f.read())
 f.close()
 
 # Get QA list for medical assessment
-QA = []
-for q in range(len(_en_US["medical_assessment"])):
-    QA.append("Q{}".format(q+1))
+QA = { "en": {}, "de": {}}
+# QA = []
+# for q in range(len(_en_US["medical_assessment"])):
+#     QA.append("Q{}".format(q+1))
 
 
 @app.route('/', methods=['GET'])
@@ -874,8 +875,10 @@ def medical(sender_id):
         USER_DATA[sender_id][MEDICAL] = {}
         USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = "P0"
 
-    response = get_next_question(sender_id, "en", USER_DATA[sender_id][MEDICAL][MEDICAL_QA])
-    payload = payload_prepare(eval(repr(response)))
+    response = eval(repr(get_next_question(sender_id, "en", USER_DATA[sender_id][MEDICAL][MEDICAL_QA])))
+    # Update QA builder
+    QA["en"][USER_DATA[sender_id][MEDICAL][MEDICAL_QA]] = response["text"]
+    payload = payload_prepare(response)
     send_message(sender_id, payload)
 
     return
@@ -940,6 +943,7 @@ def medical_assessment(sender_id):
         return
 
     else:
+        print("\nQA Builder: {}\n\n".format(QA))
         # Record answer
         current_question = USER_DATA[sender_id][MEDICAL][MEDICAL_QA]
         USER_DATA[sender_id][MEDICAL][current_question] = USER_DATA[sender_id][REPLY]
@@ -947,13 +951,17 @@ def medical_assessment(sender_id):
         response = eval(repr(get_next_question(sender_id, "en", current_question)))
         print(response)
         if response:
+            # Update QA builder
+            QA["en"][USER_DATA[sender_id][MEDICAL][MEDICAL_QA]] = response["text"]
             next_question = check_answer(response, USER_DATA[sender_id][MEDICAL][current_question])
             print(next_question)
             USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = next_question
             if next_question is not None:
-                response = get_next_question(sender_id, "en", next_question)
+                response = eval(repr(get_next_question(sender_id, "en", next_question)))
                 if response:
-                    payload = payload_prepare(eval(repr(response)))
+                    # Update QA builder
+                    QA["en"][USER_DATA[sender_id][MEDICAL][MEDICAL_QA]] = response["text"]
+                    payload = payload_prepare(response)
                     send_message(sender_id, payload)
                 # If response is False, end of the assessment is reached
                 else:
@@ -990,9 +998,10 @@ def medical_case(sender_id):
     exam += "FB UserId: {}\n".format(sender_id)
     exam += "Short story: {}\n".format(USER_DATA[sender_id][STORY])
 
-    # for questions in lang["medical_assessment"]:
-    #     exam += "{}: {}\n".format(lang["medical_assessment"][questions]["text"],
-    #                               USER_DATA[sender_id][MEDICAL][questions])
+    for questions in USER_DATA[sender_id][MEDICAL]:
+        if questions in QA["en"]:
+            exam += "{}: {}\n".format(QA["en"][questions],
+                                      USER_DATA[sender_id][MEDICAL][questions])
 
     # Send examination
     par = {

@@ -848,11 +848,16 @@ def check_answer(response, answer):
     if "answers" in response:
         try:
             if answer in response["answers"]:
-                return response["answers"][answer], False
+                return response["answers"][answer]
+            else:
+                print("free form answer like a date input")
+                return response["answers"]
         except Exception as e:
-            return response["answers"], False
+            print("the supplied user answer is not in the response answers")
+            return response["answers"]
     else:
-        return None, False
+        print("there is no answers key")
+        return None
 
 
 def medical(sender_id):
@@ -864,7 +869,12 @@ def medical(sender_id):
     # send_message(sender_id, payload)
 
     # P0 is the entry point for Q&A
-    response = get_next_question(sender_id, "en", "P0")
+    # Add the MEDICAL key if it does not exist
+    if MEDICAL not in USER_DATA[sender_id]:
+        USER_DATA[sender_id][MEDICAL] = {}
+        USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = "P0"
+
+    response = get_next_question(sender_id, "en", USER_DATA[sender_id][MEDICAL][MEDICAL_QA])
     payload = payload_prepare(eval(repr(response)))
     send_message(sender_id, payload)
 
@@ -914,10 +924,10 @@ def medical_assessment(sender_id):
     #         send_message(sender_id, payload)
     #         break
 
-    # Add the MEDICAL key if it does not exist
-    if MEDICAL not in USER_DATA[sender_id]:
-        USER_DATA[sender_id][MEDICAL] = {}
-        USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = "P0"
+    # # Add the MEDICAL key if it does not exist
+    # if MEDICAL not in USER_DATA[sender_id]:
+    #     USER_DATA[sender_id][MEDICAL] = {}
+    #     USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = "P0"
 
     # Command handler
     if USER_DATA[sender_id][REPLY] == "Stop":
@@ -934,21 +944,33 @@ def medical_assessment(sender_id):
         current_question = USER_DATA[sender_id][MEDICAL][MEDICAL_QA]
         USER_DATA[sender_id][MEDICAL][current_question] = USER_DATA[sender_id][REPLY]
         # Check what the next question should be
-        response = get_next_question(sender_id, "en", current_question)
-        print(eval(repr(response)))
-        next_question, end = check_answer(eval(repr(response)), USER_DATA[sender_id][MEDICAL][current_question])
-        print(next_question)
-        USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = next_question
-        if not end:
+        response = eval(repr(get_next_question(sender_id, "en", current_question)))
+        print(response)
+        if response:
+            next_question = check_answer(response, USER_DATA[sender_id][MEDICAL][current_question])
+            print(next_question)
+            USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = next_question
             if next_question is not None:
                 response = get_next_question(sender_id, "en", next_question)
-                payload = payload_prepare(eval(repr(response)))
-                send_message(sender_id, payload)
+                if response:
+                    payload = payload_prepare(eval(repr(response)))
+                    send_message(sender_id, payload)
+                # If response is False, end of the assessment is reached
+                else:
+                    # Set the next intent for the conversation
+                    USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
+                    payload = lang["qa_finish"]
+                    send_message(sender_id, payload)
+
+        # If response is False, end of the assessment is reached
         else:
             # Set the next intent for the conversation
             USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
+            USER_DATA[sender_id][CURRENT_INTENT] = CANCEL
             payload = lang["qa_finish"]
             send_message(sender_id, payload)
+
+            return
 
     return
 
@@ -968,9 +990,9 @@ def medical_case(sender_id):
     exam += "FB UserId: {}\n".format(sender_id)
     exam += "Short story: {}\n".format(USER_DATA[sender_id][STORY])
 
-    for questions in lang["medical_assessment"]:
-        exam += "{}: {}\n".format(lang["medical_assessment"][questions]["text"],
-                                  USER_DATA[sender_id][MEDICAL][questions])
+    # for questions in lang["medical_assessment"]:
+    #     exam += "{}: {}\n".format(lang["medical_assessment"][questions]["text"],
+    #                               USER_DATA[sender_id][MEDICAL][questions])
 
     # Send examination
     par = {

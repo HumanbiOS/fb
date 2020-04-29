@@ -848,14 +848,30 @@ def payload_prepare(response):
 def check_answer(response, answer):
     if "answers" in response:
         try:
-            if answer in response["answers"]:
-                return response["answers"][answer]
-            else:
+            if response["free"]:
                 print("free form answer like a date input")
                 return response["answers"]
+
+            elif answer in response["answers"]:
+                # return the next question id
+                return response["answers"][answer]
+
+            else:
+                # check if this is a truncated answer or did the user just type something bogus
+                if len(answer) > 19:
+                    print("truncation - {} :{}".format(answer, len(answer)))
+                    for k in response["answers"]:
+                        c = str(k)
+                        if answer[0:20] == c[0:20]:
+                            # return the next question id
+                            return response["answers"][k]
+
+                # User made a mistake
+                return None
+
         except Exception as e:
             print("the supplied user answer is not in the response answers")
-            return response["answers"]
+            return None
     else:
         print("there is no answers key")
         return None
@@ -943,32 +959,38 @@ def medical_assessment(sender_id):
         return
 
     else:
-        print("\nQA Builder: {}\n\n".format(QA))
         # Record answer
         current_question = USER_DATA[sender_id][MEDICAL][MEDICAL_QA]
         USER_DATA[sender_id][MEDICAL][current_question] = USER_DATA[sender_id][REPLY]
         # Check what the next question should be
         response = eval(repr(get_next_question(sender_id, "en", current_question)))
-        print(response)
+
         if response:
             # Update QA builder
             QA["en"][USER_DATA[sender_id][MEDICAL][MEDICAL_QA]] = response["text"]
             next_question = check_answer(response, USER_DATA[sender_id][MEDICAL][current_question])
-            print(next_question)
-            USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = next_question
+
             if next_question is not None:
-                response = eval(repr(get_next_question(sender_id, "en", next_question)))
-                if response:
-                    # Update QA builder
-                    QA["en"][USER_DATA[sender_id][MEDICAL][MEDICAL_QA]] = response["text"]
-                    payload = payload_prepare(response)
-                    send_message(sender_id, payload)
-                # If response is False, end of the assessment is reached
-                else:
-                    # Set the next intent for the conversation
-                    USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
-                    payload = lang["qa_finish"]
-                    send_message(sender_id, payload)
+                USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = next_question
+                if next_question is not None:
+                    response = eval(repr(get_next_question(sender_id, "en", next_question)))
+                    if response:
+                        # Update QA builder
+                        QA["en"][USER_DATA[sender_id][MEDICAL][MEDICAL_QA]] = response["text"]
+                        payload = payload_prepare(response)
+                        send_message(sender_id, payload)
+                    # If response is False, end of the assessment is reached
+                    else:
+                        # Set the next intent for the conversation
+                        USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
+                        payload = lang["qa_finish"]
+                        send_message(sender_id, payload)
+
+            # User made a mistake
+            else:
+                # Ask the same question again
+                payload = payload_prepare(response)
+                send_message(sender_id, payload)
 
         # If response is False, end of the assessment is reached
         else:
@@ -979,7 +1001,6 @@ def medical_assessment(sender_id):
             send_message(sender_id, payload)
 
             return
-
     return
 
 

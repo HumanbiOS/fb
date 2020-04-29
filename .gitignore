@@ -5,3 +5,6 @@
 /modules/QA-module/.gitignore
 /modules/QA-module/.gitmodules
 /modules/QA-module/__init__.py
+.venv
+.idea
+*/__pycache__/*

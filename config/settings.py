@@ -16,13 +16,11 @@ dotenv.load_dotenv(env_path)
 # Facebook Page Access Token
 PAT = os.getenv("PAT", "")
 VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "")
-# Telegram bot
-TELEGRAM_BOT_NAME = os.getenv("TELEGRAM_BOT_NAME", "")
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-# Telegram channels
-DOCTORS_ROOM_TG = os.getenv("DOCTORS_ROOM_TG", "")
-PSYCHOLOGIST_ROOM_TG = os.getenv("PSYCHOLOGIST_ROOM_TG", "")
-HELPER_ROOM_TG = os.getenv("HELPER_ROOM_TG", "")
-
+# Security tokens
+INSTANCE_SECURITY_TOKEN = os.getenv("INSTANCE_SECURITY_TOKEN", "")
+SERVER_SECURITY_TOKEN = os.getenv("SERVER_SECURITY_TOKEN", "")
+INSTANCE_NAME = os.getenv("INSTANCE_NAME")
+# Sever url
+SERVER_URL = os.getenv("SERVER_ADDRESS", "")
 # Webhook
 WEBHOOK = os.getenv("WEBHOOK", "")

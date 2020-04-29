@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import logging
 import os
 import time
+import logging
 
 import aiohttp
 from sanic import Sanic
@@ -56,7 +56,7 @@ async def handle_verification(request):
 @app.route('/webhooks/facebook/in', methods=['POST'])
 async def handle_incoming_message(request):
     # Performance info [DEBUG]
-    logger.info("post received - {}".format(time.monotonic()))
+    logger.info(f"post received - {time.monotonic()}")
 
     # Handle messages sent by facebook messenger to the application
     data = request.json
@@ -64,6 +64,21 @@ async def handle_incoming_message(request):
 
     # Handle message
     await handle_fb_message(data)
+
+    return text("ok")
+
+
+@app.route('/webhooks/facebook/out', methods=['POST'])
+async def handle_outgoing_message(request):
+    # Performance info [DEBUG]
+    logger.info(f"sending post - {time.monotonic()}")
+
+    # Handle messages sent by server into facebook messenger
+    data = request.json
+    logger.info(data)
+
+    # Handle message
+    #await handle_fb_message(data)
 
     return text("ok")
 
@@ -106,15 +121,23 @@ async def handle_fb_message(data):
                         if profile is not None:
                             payload["user"]["first_name"] = profile['first_name']
                             payload["user"]["last_name"] = profile['first_name']
+                            payload['is_file'] = True
+                            payload['is_image'] = True
+                            payload['files'] = [{
+                                "payload": profile['profile_pic']
+                            }]
 
                         if "text" in messaging_event["message"]:
                             payload["is_message"] = True
                             payload["message"] = {
                                 "text": messaging_event["message"]["text"]
                             }
-                            async with session.post(settings.SERVER_URL, json=payload, headers=H) as resp:
-                                pass
-                                # DEBUG: print(await resp.json())
+
+                        async with session.post(settings.SERVER_URL, json=payload, headers=H) as resp:
+                            pass
+                            # DEBUG:
+                            ret_value = await resp.json()
+                            logger.info(f"Server immediate response: {ret_value}")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8443, debug=False)

@@ -117,6 +117,8 @@ async def handle_verification(request):
 
     if request.args.get('hub.verify_token', '') == VERIFY_TOKEN:
         logger.info("succefully verified")
+        # Set a get started button
+        get_started()
         return text(request.args.get('hub.challenge', ''))
     else:
         logger.error("Wrong verification token!")
@@ -338,6 +340,18 @@ def set_telegram_webhook():
     return
 
 
+def get_started():
+    # Sending response back to the user using facebook graph API
+    r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                      params={"access_token": PAT},
+                      headers={"Content-Type": "application/json"},
+                      data=js.dumps({
+                          "payload": "Get Started"
+                      }))
+
+    return json(r.content)
+
+
 def send_message(sender_id, payload):
     # Performance info
     logger.info("response sending.. - {}".format(time.monotonic()))
@@ -353,6 +367,37 @@ def send_message(sender_id, payload):
 
     # Performance info
     logger.info("response sent - {}".format(time.monotonic()))
+
+    return json(r.content)
+
+
+def send_media(sender_id, payload):
+    # Performance info
+    logger.info("response sending attachment.. - {}".format(time.monotonic()))
+    # Sending response back to the user using facebook graph API
+    r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                      params={"access_token": PAT},
+                      headers={"Content-Type": "application/json"},
+                      data=js.dumps({
+                          "recipient": {"id": sender_id},
+                          "message": {
+                              "attachment": {
+                                  "type": "template",
+                                  "payload": {
+                                      "template_type": "media",
+                                      "elements": [
+                                          {
+                                              "media_type": "image",
+                                              "url": payload
+                                          }
+                                      ]
+                                  }
+                              }
+                          }
+                      }))
+
+    # Performance info
+    logger.info("response attachment sent - {}".format(time.monotonic()))
 
     return json(r.content)
 
@@ -390,9 +435,11 @@ def conversation_handler(sender_id):
         if USER_DATA[sender_id][CURRENT_INTENT] == LANGUAGE:
             if USER_DATA[sender_id][REPLY] in ['English', 'Russian', 'Spanish']:
                 USER_DATA[sender_id][LANGUAGE] = USER_DATA[sender_id][REPLY]
-                welcome(sender_id)
+                # welcome(sender_id)
+                legal(sender_id)
                 # Set the next intent for the conversation
-                USER_DATA[sender_id][CURRENT_INTENT] = STORY
+                #USER_DATA[sender_id][CURRENT_INTENT] = STORY
+                USER_DATA[sender_id][CURRENT_INTENT] = LEGAL
 
             else:
                 unknown(sender_id)
@@ -402,29 +449,37 @@ def conversation_handler(sender_id):
         elif USER_DATA[sender_id][CURRENT_INTENT] == STORY:
             USER_DATA[sender_id][STORY] = USER_DATA[sender_id][REPLY]
             media(sender_id)
+            #emergency_or_help(sender_id)
             # Set the next intent for the conversation
             USER_DATA[sender_id][CURRENT_INTENT] = MEDIA
+            #USER_DATA[sender_id][CURRENT_INTENT] = EMERGENCY_OR_HELP
 
         # Get the user media
         elif USER_DATA[sender_id][CURRENT_INTENT] == MEDIA:
             USER_DATA[sender_id][MEDIA] = USER_DATA[sender_id][REPLY]
-            legal(sender_id)
+            #legal(sender_id)
+            medical(sender_id)
             # Set the next intent for the conversation
-            USER_DATA[sender_id][CURRENT_INTENT] = LEGAL
+            #USER_DATA[sender_id][CURRENT_INTENT] = LEGAL
+            USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL
 
         # Get the disclaimer reply
         elif USER_DATA[sender_id][CURRENT_INTENT] == LEGAL:
-            if USER_DATA[sender_id][REPLY] in ['Yes', 'yes', 'да', 'Sí']:
+            if USER_DATA[sender_id][REPLY] in ['Accept', 'accept', 'принимать', 'Aceptar', 'aceptar']:
                 USER_DATA[sender_id][LEGAL] = USER_DATA[sender_id][REPLY]
-                emergency_or_help(sender_id)
+                #emergency_or_help(sender_id)
+                welcome(sender_id)
                 # Set the next intent for the conversation
-                USER_DATA[sender_id][CURRENT_INTENT] = EMERGENCY_OR_HELP
+                # USER_DATA[sender_id][CURRENT_INTENT] = EMERGENCY_OR_HELP
+                USER_DATA[sender_id][CURRENT_INTENT] = STORY
 
-            elif USER_DATA[sender_id][REPLY] in ['No', 'no', 'нет']:
+            elif USER_DATA[sender_id][REPLY] in ['Reject', 'reject', 'отклонять', 'Rechazar', 'rechazar']:
                 USER_DATA[sender_id][LEGAL] = USER_DATA[sender_id][REPLY]
                 bye(sender_id)
                 # Set the next intent for the conversation
                 USER_DATA[sender_id][CURRENT_INTENT] = FINISH
+                # Clear all user data
+                USER_DATA.pop(sender_id)
 
             else:
                 unknown(sender_id)
@@ -537,7 +592,7 @@ def conversation_handler(sender_id):
                 if time.time() - USER_DATA[sender_id][CONSULTATION][WAIT_TIMER] > 15*60:
                     user_waiting(sender_id, DOCTORS_ROOM_TG)
 
-        # Chatting to the psychologist
+        # Chatting to the doctor
         elif USER_DATA[sender_id][CURRENT_INTENT] == MEDICAL_FOUND:
             send_message_to_telegram(USER_DATA[sender_id][CONSULTATION][CONSULTANT], USER_DATA[sender_id][REPLY])
 
@@ -583,6 +638,8 @@ def welcome(sender_id):
 
 
 def language(sender_id):
+    payload = "https://www.facebook.com/photo.php?fbid=106333174351080"
+    send_media(sender_id, payload)
     # Always start with English
     payload = _en_US["language"]
     send_message(sender_id, payload)
@@ -942,11 +999,6 @@ def medical_assessment(sender_id):
     #         payload = lang["medical_assessment"][QA[i+1]]
     #         send_message(sender_id, payload)
     #         break
-
-    # # Add the MEDICAL key if it does not exist
-    # if MEDICAL not in USER_DATA[sender_id]:
-    #     USER_DATA[sender_id][MEDICAL] = {}
-    #     USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = "P0"
 
     # Command handler
     if USER_DATA[sender_id][REPLY] == "Stop":

@@ -10,12 +10,12 @@
 			"0": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "Sí"
+				"title": "Aceptar"
 			},
 			"1": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "No"
+				"title": "Rechazar"
 			},
 			"2": {
 				"content_type": "text",
@@ -23,7 +23,7 @@
 				"title": "Stop"
 			}
 		},
-		"text": "Aviso Legal:\nEl uso de este software no reemplaza el tratamiento médico y no proporciona servicios de diagnóstico. Si actualmente se siente gravemente enfermo, llame a un médico de inmediato.\n\nLas partes involucradas actúan de buena fe para cumplir con la obligación de primeros auxilios y el deber de cuidar con el mejor esfuerzo.\n\nAl usar este software, usted acepta no responsabilizar a ninguna de las partes involucradas (incluyendo específicamente homicidio / asalto negligente).\n\nLas partes involucradas incluyen, pero no se limitan a:\n\n- las personas u organizaciones con las que interactúa a través de este software.\n\nAviso de privacidad disponible en https://humanbios.org/#/impressum"
+		"text": "Con su consentimiento, almacenaremos y analizaremos su uso de la aplicación HumanBios para investigaciones científicas y para mejorar su experiencia al usar la aplicación HumanBios.\n\nSi da su consentimiento, nos pondremos en contacto con usted a través del medio en el que dio su permiso para la investigación científica y para mejorar su experiencia al usar la aplicación Human Bios.\n\nPara obtener más información, visite la política de privacidad en https://humanbios.org/#/privacy.\n\nSi ha leído y dado su consentimiento a la Nota de privacidad, presione 'aceptar'."
 	},
 	"emergency_or_help": {
 		"quick_replies": {

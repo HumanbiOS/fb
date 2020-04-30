@@ -10,12 +10,12 @@
 			"0": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "Yes"
+				"title": "Accept"
 			},
 			"1": {
 				"content_type": "text",
 				"payload": "<POSTBACK_PAYLOAD>",
-				"title": "No"
+				"title": "Reject"
 			},
 			"2": {
 				"content_type": "text",
@@ -23,7 +23,7 @@
 				"title": "Stop"
 			}
 		},
-		"text": "Legal notice:\nThe use of this software does not replace medical treatment and does not provide diagnostic services. If you currently feel seriously ill, call a doctor immediately.\n\nThe involved parties act in good faith to fulfill the first aid obligation and the duty to care on a best effort basis.\n\nBy using this software, you agree not to hold liable any of the involved parties (specifically including negligent homicide/assault).\n\nThe involved parties include but are not limited to:\n\n- the individuals or organizations you interact with via this software.\n\nPrivacy notice available at https://humanbios.org/#/impressum"
+		"text": "With your consent, we will store and analyze your use of the HumanBios App for scientific research and to improve your experience when using the HumanBios App. \n\nIf you give your consent, we will contact you over the medium where you gave your permission for scientific research and to improve your experience when using the Human Bios App.\n\nFor further information, visit the privacy policy at https://humanbios.org/#/privacy.\n\nIf you have read and give your consent to the Privacy Note press 'accept'."
 	},
 	"emergency_or_help": {
 		"quick_replies": {

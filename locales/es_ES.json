@@ -1,4 +1,34 @@
 {
+	"coughing": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Skip"
+			}
+		},
+		"text": "¿Podría enviarnos un video o una nota de voz de su tos? Esto nos ayudará a comprender la gravedad de la situación."
+	},
+    "coughing_wrong_answer": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Skip"
+			}
+		},
+		"text": "Lo sentimos, este no es un tipo de medio compatible. Intente enviar una nota de voz / mensaje o una grabación de video.\n\n"
+	},
+	"location": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Skip"
+			}
+		},
+		"text": "¿Puede enviarnos su ubicación para que podamos rastrear la posible propagación o advertirle sobre casos cercanos a usted?"
+	},
 	"bye": {
 		"text": "De acuerdo, ¡cuéntales a tus amigos sobre humanbios!"
 	},

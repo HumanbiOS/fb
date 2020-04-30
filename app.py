@@ -63,8 +63,10 @@ MEDIA = "MEDIA"
 ATTACHMENTS = "ATTACHMENTS"
 IMAGE = "IMAGE"
 VIDEO = "VIDEO"
+VIDEO_FLAG = "VIDEO_FLAG"
 AUDIO = "AUDIO"
 LOCATION = "LOCATION"
+LOCATION_FLAG = "LOCATION_FLAG"
 LEGAL = "LEGAL"
 EMERGENCY_OR_HELP = "EMERGENCY_OR_HELP"
 HELPING = "HELPING"
@@ -249,7 +251,7 @@ def handle_tg_message(data):
                                 continue
                             # For the rest of the users, let them know the doctor has left
                             if USER_DATA[user][CONSULTANT_LATEST] == consultant:
-                                payload = {"text": "Doctor has ended the conversation."}
+                                payload = {"text": "The conversation ended."}
                                 send_message(sender_id, payload)
                                 # Clear the consultation section in the context
                                 USER_DATA[sender_id].pop(CONSULTANT_LATEST)
@@ -272,7 +274,7 @@ def handle_tg_message(data):
                     if CONSULTANT_LATEST in USER_DATA[sender_id]:
                         if USER_DATA[sender_id][CONSULTANT_LATEST] == consultant:
                             USER_DATA[sender_id][CONSULTATION][CONSULTANT_REPLY] = reply
-                            payload = {"text": "Doctor has ended the conversation."}
+                            payload = {"text": "The conversation ended."}
                             send_message(sender_id, payload)
                             # Clear the consultation section in the context
                             USER_DATA[sender_id].pop(CONSULTANT_LATEST)
@@ -578,6 +580,22 @@ def conversation_handler(sender_id):
 
             # Check if the assessment is complete
             if USER_DATA[sender_id][MEDICAL][MEDICAL_QA] == DONE:
+                # Ask for video
+                get_video(sender_id)
+                # Set the next intent for the conversation
+                USER_DATA[sender_id][CURRENT_INTENT] = VIDEO_FLAG
+
+        # Get video
+        elif USER_DATA[sender_id][CURRENT_INTENT] == VIDEO_FLAG:
+            if USER_DATA[sender_id][REPLY] in ["Skip"]:
+                # Ask location
+                get_location(sender_id)
+                # Set the next intent for the conversation
+                USER_DATA[sender_id][CURRENT_INTENT] = LOCATION_FLAG
+
+        # Get location
+        elif USER_DATA[sender_id][CURRENT_INTENT] == LOCATION_FLAG:
+            if USER_DATA[sender_id][REPLY] in ["Skip"]:
                 # Do a medical case assignment
                 # Forward the info and assign a case
                 medical_case(sender_id)
@@ -612,6 +630,20 @@ def conversation_handler(sender_id):
         elif USER_DATA[sender_id][CURRENT_INTENT] == ATTACHMENTS:
             attachment(sender_id)
             USER_DATA[sender_id][CURRENT_INTENT] = USER_DATA[sender_id][NEXT_INTENT]
+
+            # Depending on the current flow, ask the following based on the next intent
+            if USER_DATA[sender_id][CURRENT_INTENT] == VIDEO_FLAG:
+                # Ask location
+                get_location(sender_id)
+                # Set the next intent for the conversation
+                USER_DATA[sender_id][CURRENT_INTENT] = LOCATION_FLAG
+            elif USER_DATA[sender_id][CURRENT_INTENT] == LOCATION_FLAG:
+                # Do a medical case assignment
+                # Forward the info and assign a case
+                medical_case(sender_id)
+                # Set the next intent for the conversation
+                USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL_WAIT
+
 
     # Debug info
     print('\n{}\n'.format(USER_DATA))
@@ -650,6 +682,22 @@ def language(sender_id):
 def media(sender_id):
     lang = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["media"]
+    send_message(sender_id, payload)
+
+    return
+
+
+def get_video(sender_id):
+    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    payload = lang["coughing"]
+    send_message(sender_id, payload)
+
+    return
+
+
+def get_location(sender_id):
+    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    payload = lang["location"]
     send_message(sender_id, payload)
 
     return

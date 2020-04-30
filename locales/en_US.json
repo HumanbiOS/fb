@@ -1,4 +1,34 @@
 {
+	"coughing": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Skip"
+			}
+		},
+		"text": "Could you send us a video or voice note of you coughing? This will help us understand the severity of the situation."
+	},
+    "coughing_wrong_answer": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Skip"
+			}
+		},
+		"text": "We sorry, this is not a supported media type. Please try sending a voice note/message or a video recording."
+	},
+	"location": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Skip"
+			}
+		},
+		"text": "Can you send us your location so we can track potential spread or warn you about cases close to you?"
+	},
 	"bye": {
 		"text": "Okay, please tell your friends about humanbios!"
 	},

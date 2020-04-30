@@ -7,7 +7,7 @@
 				"title": "Skip"
 			}
 		},
-		"text": "¿Podría enviarnos un video o una nota de voz de su tos? Esto nos ayudará a comprender la gravedad de la situación."
+		"text": "¿Podría enviarnos un video o una nota de voz de su tos? Esto nos ayudará a comprender su situación y brindarle una mejor información."
 	},
     "coughing_wrong_answer": {
 		"quick_replies": {
@@ -53,7 +53,7 @@
 				"title": "Stop"
 			}
 		},
-		"text": "Con su consentimiento, almacenaremos y analizaremos su uso de la aplicación HumanBios para investigaciones científicas y para mejorar su experiencia al usar la aplicación HumanBios.\n\nSi da su consentimiento, nos pondremos en contacto con usted a través del medio en el que dio su permiso para la investigación científica y para mejorar su experiencia al usar la aplicación Human Bios.\n\nPara obtener más información, visite la política de privacidad en https://humanbios.org/#/privacy.\n\nSi ha leído y dado su consentimiento a la Nota de privacidad, presione 'aceptar'."
+		"text": "Con su consentimiento, almacenaremos y analizaremos su uso de la aplicación HumanBios para investigaciones científicas y para mejorar su experiencia al usar la aplicación HumanBios.\n\nSi da su consentimiento, nos pondremos en contacto con usted a través del medio en el que dio su permiso para la investigación científica y para mejorar su experiencia al usar la aplicación Human Bios.\n\nPara obtener más información, visite la política de privacidad en https://bit.ly/HumanBios_privacy_note.\n\nSi ha leído y dado su consentimiento a la Nota de privacidad, presione 'aceptar'."
 	},
 	"emergency_or_help": {
 		"quick_replies": {

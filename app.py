@@ -106,7 +106,7 @@ _es_ES = js.loads(f.read())
 f.close()
 
 # Get QA list for medical assessment
-QA = { "en": {}, "de": {}}
+QA = {"en": {}, "de": {}, "ru": {}, "es": {}, "fr": {}}
 # QA = []
 # for q in range(len(_en_US["medical_assessment"])):
 #     QA.append("Q{}".format(q+1))
@@ -654,15 +654,19 @@ def conversation_handler(sender_id):
 def choose_language(lang):
     # Set the user language
     if lang == 'English':
-        return _en_US
+        return _en_US, "en"
     elif lang == 'Russian':
-        return _ru_RU
+        return _ru_RU, "ru"
     elif lang == 'Spanish':
-        return _es_ES
+        return _es_ES, "es"
+    elif lang == 'German':
+        return _es_ES, "de"
+    elif lang == 'French':
+        return _es_ES, "fr"
 
 
 def welcome(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["welcome"]
     send_message(sender_id, payload)
 
@@ -680,7 +684,7 @@ def language(sender_id):
 
 
 def media(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["media"]
     send_message(sender_id, payload)
 
@@ -688,7 +692,7 @@ def media(sender_id):
 
 
 def get_video(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["coughing"]
     send_message(sender_id, payload)
 
@@ -696,7 +700,7 @@ def get_video(sender_id):
 
 
 def get_location(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["location"]
     send_message(sender_id, payload)
 
@@ -716,7 +720,7 @@ def user_waiting(sender_id, channel_id):
 
 
 def attachment(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["attachment"]
     send_message(sender_id, payload)
 
@@ -785,7 +789,7 @@ def send_attachments(sender_id, channel_id):
 
 
 def legal(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["disclaimer"]
     send_message(sender_id, payload)
 
@@ -793,7 +797,7 @@ def legal(sender_id):
 
 
 def emergency_or_help(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["emergency_or_help"]
     send_message(sender_id, payload)
 
@@ -801,7 +805,7 @@ def emergency_or_help(sender_id):
 
 
 def helping(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["helping"]
     send_message(sender_id, payload)
 
@@ -809,7 +813,7 @@ def helping(sender_id):
 
 
 def new_member_info(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["new_member_info"]
     send_message(sender_id, payload)
 
@@ -817,7 +821,7 @@ def new_member_info(sender_id):
 
 
 def new_member_confirm(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["new_member_confirm"]
     send_message(sender_id, payload)
 
@@ -846,7 +850,7 @@ def new_member_confirm(sender_id):
 
 
 def medical_or_psychological(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["medical_or_psychological"]
     send_message(sender_id, payload)
 
@@ -854,7 +858,7 @@ def medical_or_psychological(sender_id):
 
 
 def psychological(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["psychological"]
     send_message(sender_id, payload)
 
@@ -862,7 +866,7 @@ def psychological(sender_id):
 
 
 def psychological_assessment(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["psychological_assessment"]
     send_message(sender_id, payload)
 
@@ -870,7 +874,7 @@ def psychological_assessment(sender_id):
 
 
 def psychological_case(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["psychological_case"]
     send_message(sender_id, payload)
 
@@ -905,7 +909,7 @@ def psychological_case(sender_id):
 
 
 def psychological_wait(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["psychological_wait"]
     send_message(sender_id, payload)
 
@@ -913,7 +917,7 @@ def psychological_wait(sender_id):
 
 
 def psychological_found(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["psychological_found"]
     send_message(sender_id, payload)
 
@@ -940,12 +944,30 @@ def payload_prepare(response):
                 "payload": "<POSTBACK_PAYLOAD>",
                 "title": "Stop"
             }
-            payload = {"text": response["text"], "quick_replies": quick_replies}
+            if response["comment"]:
+                payload = {
+                    "text": "{}\n\n{}".format(response["text"], response["comment"]),
+                    "quick_replies": quick_replies
+                }
+            else:
+                payload = {
+                    "text": "{}".format(response["text"]),
+                    "quick_replies": quick_replies
+                }
         except Exception as e:
-            payload = {"text": response["text"]}
+            payload = {
+                "text": "{}".format(response["text"])
+            }
 
     else:
-        payload = {"text": response["text"]}
+        if response["comment"]:
+            payload = {
+                "text": "{}\n\n{}".format(response["text"], response["comment"])
+            }
+        else:
+            payload = {
+                "text": "{}".format(response["text"])
+            }
 
     return payload
 
@@ -983,7 +1005,7 @@ def check_answer(response, answer):
 
 
 def medical(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["medical"]
     send_message(sender_id, payload)
 
@@ -996,9 +1018,9 @@ def medical(sender_id):
         USER_DATA[sender_id][MEDICAL] = {}
         USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = "P0"
 
-    response = eval(repr(get_next_question(sender_id, "en", USER_DATA[sender_id][MEDICAL][MEDICAL_QA])))
+    response = eval(repr(get_next_question(sender_id, lang_short, USER_DATA[sender_id][MEDICAL][MEDICAL_QA])))
     # Update QA builder
-    QA["en"][USER_DATA[sender_id][MEDICAL][MEDICAL_QA]] = response["text"]
+    QA[lang_short][USER_DATA[sender_id][MEDICAL][MEDICAL_QA]] = response["text"]
     payload = payload_prepare(response)
     send_message(sender_id, payload)
 
@@ -1015,7 +1037,7 @@ def medical_assessment(sender_id):
     #     payload = BOT_LANGUAGE["medical_assessment"][Q2]
     #     send_message(sender_id, payload)
 
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
 
     # # Add the MEDICAL key if it does not exist
     # if MEDICAL not in USER_DATA[sender_id]:
@@ -1063,17 +1085,17 @@ def medical_assessment(sender_id):
         current_question = USER_DATA[sender_id][MEDICAL][MEDICAL_QA]
         USER_DATA[sender_id][MEDICAL][current_question] = USER_DATA[sender_id][REPLY]
         # Check what the next question should be
-        response = eval(repr(get_next_question(sender_id, "en", current_question)))
+        response = eval(repr(get_next_question(sender_id, lang_short, current_question)))
 
         if response:
             # Update QA builder
-            QA["en"][USER_DATA[sender_id][MEDICAL][MEDICAL_QA]] = response["text"]
+            QA[lang_short][USER_DATA[sender_id][MEDICAL][MEDICAL_QA]] = response["text"]
             next_question = check_answer(response, USER_DATA[sender_id][MEDICAL][current_question])
 
             if next_question is not None:
                 USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = next_question
                 if next_question is not None:
-                    response = eval(repr(get_next_question(sender_id, "en", next_question)))
+                    response = eval(repr(get_next_question(sender_id, lang_short, next_question)))
                     if response:
                         # Update QA builder
                         QA["en"][USER_DATA[sender_id][MEDICAL][MEDICAL_QA]] = response["text"]
@@ -1105,7 +1127,7 @@ def medical_assessment(sender_id):
 
 
 def medical_case(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["medical_case"]
     send_message(sender_id, payload)
 
@@ -1143,7 +1165,7 @@ def medical_case(sender_id):
 
 
 def medical_wait(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["medical_wait"]
     send_message(sender_id, payload)
 
@@ -1151,7 +1173,7 @@ def medical_wait(sender_id):
 
 
 def medical_found(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["medical_found"]
     send_message(sender_id, payload)
 
@@ -1159,7 +1181,7 @@ def medical_found(sender_id):
 
 
 def unknown(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["unknown"]
     send_message(sender_id, payload)
 
@@ -1167,7 +1189,7 @@ def unknown(sender_id):
 
 
 def cancel(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["cancel"]
     send_message(sender_id, payload)
 
@@ -1175,7 +1197,7 @@ def cancel(sender_id):
 
 
 def bye(sender_id):
-    lang = choose_language(USER_DATA[sender_id][LANGUAGE])
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
     payload = lang["bye"]
     send_message(sender_id, payload)
 

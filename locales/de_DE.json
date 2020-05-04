@@ -1,0 +1,244 @@
+{
+	"coughing": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Skip"
+			}
+		},
+		"text": "Could you send us a video or voice note of you coughing? This will help us to understand your situation and provide you with better information."
+	},
+    "coughing_wrong_answer": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Skip"
+			}
+		},
+		"text": "We sorry, this is not a supported media type. Please try sending a voice note/message or a video recording."
+	},
+	"location": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Skip"
+			}
+		},
+		"text": "Can you send us your location so we can track potential spread or warn you about cases close to you?"
+	},
+	"bye": {
+		"text": "Okay, please tell your friends about humanbios!"
+	},
+	"cancel": {
+		"text": "Goodbye, please tell your friends about humanbios!"
+	},
+	"disclaimer": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Accept"
+			},
+			"1": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Reject"
+			},
+			"2": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Stop"
+			}
+		},
+		"text": "With your consent, we will store and analyze your use of the HumanBios App for scientific research and to improve your experience when using the HumanBios App. \n\nIf you give your consent, we will contact you over the medium where you gave your permission for scientific research and to improve your experience when using the Human Bios App.\n\nFor further information, visit the privacy policy at https://bit.ly/HumanBios_privacy_note.\n\nIf you have read and give your consent to the Privacy Note press 'accept'."
+	},
+	"emergency_or_help": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Yes"
+			},
+			"1": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "No"
+			},
+			"2": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Stop"
+			}
+		},
+		"text": "This is an emergency service. Do you need help?"
+	},
+	"helping": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Yes"
+			},
+			"1": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "No"
+			},
+			"2": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Stop"
+			}
+		},
+		"text": "That's great! Do you wanna help?"
+	},
+	"language": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "English"
+			},
+			"1": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Russian"
+			},
+			"2": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Spanish"
+			},
+			"3": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Stop"
+			}
+		},
+		"text": "Please select the language you want to me to talk in to you from now on."
+	},
+	"medical": {
+		"text": "Dear Human, we will try to help you as much as we can. This bot will ask a series of question now which will help understanding your case. First one:"
+	},
+	"medical_wait": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Stop"
+			}
+		},
+		"text": "We will get back to you, please be patient."
+	},
+	"medical_or_psychological": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Yes"
+			},
+			"1": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "No"
+			},
+			"2": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Stop"
+			}
+		},
+		"text": "Are you looking for medical assistance? If you would just like to talk to someone press no."
+	},
+	"new_member_confirm": {
+		"text": "Thank you, we will get back to you soon."
+	},
+	"new_member_info": {
+		"text": "Welcome new member. We are so glad you’re here! Please provide a short description of what you would like to help with and what you can do. Keep it brief and professional"
+	},
+	"media": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "No"
+			},
+			"1": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Stop"
+			}
+		},
+		"text": "You can also take a picture of yourself right now and send it here. This will help other people to understand your situation."
+	},
+	"attachment": {
+		"text": "Thank you for the attachment, we added it to your profile. You can send us more things like location, voice recording or a video."
+	},
+	"psychological": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Yes"
+			},
+			"1": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "No"
+			},
+			"2": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Stop"
+			}
+		},
+		"text": "Okay. Are you feeling stressed or anxious?"
+	},
+	"psychological_assessment": {
+		"text": "Please tell us a little about your current situation. How are you feeling? Are you afraid? Take a minute to relax and breath. Tell us also about your friends and family"
+	},
+	"psychological_case": {
+		"text": "We will send you recommendations of what you can do to stay safe&healthy soon"
+	},
+	"psychological_wait": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Stop"
+			}
+		},
+		"text": "We will get back to you, please be patient."
+	},
+	"psychological_found": {
+		"text": "Hey, we found someone who can help you. You are now connected to them - simply send your messages in here."
+	},
+	"medical_case": {
+		"text": "We will send you recommendations of what you can do to stay safe&healthy soon"
+	},
+	"medical_found": {
+		"text": "Hey, we found someone who can help you. You are now connected to them - simply send your messages in here."
+	},
+	"qa_finish": {
+		"text": "Finish"
+	},
+	"qa_multi": {
+		"text": "Since this is a multiple choice question, please press more options if you want to. Otherwise, press {0}"
+	},
+	"unknown": {
+		"text": "Sorry, but that's not any of the expected answers."
+	},
+	"welcome": {
+		"quick_replies": {
+			"0": {
+				"content_type": "text",
+				"payload": "<POSTBACK_PAYLOAD>",
+				"title": "Stop"
+			}
+		},
+		"text": "Hello! Thank you for contacting Human Bios. Before we ask you a couple of self-diagnosis questions, take the opportunity to tell us your story, if you would like to.\n\nWhere are you right now? How are your friends, your family? Do you feel safe?"
+	}
+}

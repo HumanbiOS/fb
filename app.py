@@ -1247,8 +1247,8 @@ def medical_case(sender_id):
     exam += "Short story: {}\n".format(USER_DATA[sender_id][STORY])
 
     for questions in USER_DATA[sender_id][MEDICAL]:
-        if questions in QA["en"]:
-            exam += "{}: {}\n".format(QA["en"][questions],
+        if questions in QA[lang_short]:
+            exam += "{}: {}\n".format(QA[lang_short][questions],
                                       USER_DATA[sender_id][MEDICAL][questions])
 
     # Send examination

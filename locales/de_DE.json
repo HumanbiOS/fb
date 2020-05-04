@@ -225,8 +225,11 @@
 	"qa_finish": {
 		"text": "Finish"
 	},
+	"qa_next": {
+		"text": "Next"
+	},
 	"qa_multi": {
-		"text": "Since this is a multiple choice question, please press more options if you want to. Otherwise, press {0}"
+		"text": "Since this is a multiple choice question, please press more options if you want to. Otherwise, press 'Next'"
 	},
 	"unknown": {
 		"text": "Sorry, but that's not any of the expected answers."

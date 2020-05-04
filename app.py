@@ -80,6 +80,7 @@ MEDICAL = "MEDICAL"
 MEDICAL_WAIT = "MEDICAL_WAIT"
 MEDICAL_FOUND = "MEDICAL_FOUND"
 MEDICAL_QA = "MEDICAL_QA"
+MEDICAL_QA_RESPONSE = "MEDICAL_QA_RESPONSE"
 QA_FINISH = "QA_FINISH"
 WAIT_TIMER = "WAIT_TIMER"
 CONSULTATION = "CONSULTATION"
@@ -461,6 +462,7 @@ def conversation_handler(sender_id):
             USER_DATA[sender_id][MEDIA] = USER_DATA[sender_id][REPLY]
             #legal(sender_id)
             medical(sender_id)
+
             # Set the next intent for the conversation
             #USER_DATA[sender_id][CURRENT_INTENT] = LEGAL
             USER_DATA[sender_id][CURRENT_INTENT] = MEDICAL
@@ -928,22 +930,22 @@ def payload_prepare(response):
     if "answers" in response:
         # This will build a quick_reply dict to be sent back to facebook
         answers = response["answers"]
-        quick_replies = {}
+        quick_replies = []
         i = 0
         try:
             for key, values in answers.items():
-                quick_replies[str(i)] = {
+                quick_replies.append({
                     "content_type": "text",
                     "payload": "<POSTBACK_PAYLOAD>",
                     "title": key
-                }
+                })
                 i += 1
             # Add command at the end
-            quick_replies[str(i)] = {
+            quick_replies.append({
                 "content_type": "text",
                 "payload": "<POSTBACK_PAYLOAD>",
                 "title": "Stop"
-            }
+            })
             if response["comment"]:
                 payload = {
                     "text": "{}\n\n{}".format(response["text"], response["comment"]),
@@ -972,35 +974,188 @@ def payload_prepare(response):
     return payload
 
 
-def check_answer(response, answer):
+def check_answer(sender_id, response, answer):
+    lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
+    finish = lang["qa_next"]["text"]
+
     if "answers" in response:
         try:
+            # Free form question
             if response["free"]:
                 print("free form answer like a date input")
-                return response["answers"]
+                # Record answer
+                current_question = USER_DATA[sender_id][MEDICAL][MEDICAL_QA]
+                USER_DATA[sender_id][MEDICAL][current_question] = answer
 
-            elif answer in response["answers"]:
-                # return the next question id
-                return response["answers"][answer]
+                # Update next question
+                USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = response["answers"]
+                response = eval(repr(get_next_question(sender_id, lang_short, response["answers"])))
+                USER_DATA[sender_id][MEDICAL][MEDICAL_QA_RESPONSE] = response
+                if response["multi"]:
+                    # Pop the 'Stop' command from quick_replies for multiple choice
+                    # Add a 'Next' button
+                    payload = payload_prepare(response)
+                    payload["quick_replies"].pop()
+                    payload["quick_replies"].append({
+                        "content_type": "text",
+                        "payload": "<POSTBACK_PAYLOAD>",
+                        "title": lang["qa_next"]["text"]
+                    })
+                    send_message(sender_id, payload)
+                else:
+                    payload = payload_prepare(response)
+                    send_message(sender_id, payload)
 
-            else:
+                return True
+
+            # Multi Choice question
+            elif response["multi"]:
+                if answer == finish:
+                    # return the next question id
+                    return False
+
+                elif answer in response["answers"]:
+                    # Record answer
+                    current_question = USER_DATA[sender_id][MEDICAL][MEDICAL_QA]
+                    if current_question in USER_DATA[sender_id][MEDICAL]:
+                        USER_DATA[sender_id][MEDICAL][current_question] += ", " + answer
+                    else:
+                        USER_DATA[sender_id][MEDICAL][current_question] = answer
+
+                    # Update next question
+                    USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = response["id"]
+                    response = eval(repr(get_next_question(sender_id, lang_short, response["id"])))
+                    USER_DATA[sender_id][MEDICAL][MEDICAL_QA_RESPONSE] = response
+
+                    # Pop the 'Stop' command from quick_replies for multiple choice
+                    # Add a 'Next' button
+                    payload = payload_prepare(response)
+                    payload["text"] = lang["qa_multi"]["text"]
+                    payload["quick_replies"].pop()
+                    # for item in payload["quick_replies"]:
+                    #     user_items = USER_DATA[sender_id][MEDICAL]
+                    #     if item["title"] == USER_DATA[sender_id][REPLY]:
+                    #         payload["quick_replies"].remove(item)
+                    payload["quick_replies"].append({
+                        "content_type": "text",
+                        "payload": "<POSTBACK_PAYLOAD>",
+                        "title": lang["qa_next"]["text"]
+                    })
+                    send_message(sender_id, payload)
+
+                    # return the next question id
+                    return True
+
                 # check if this is a truncated answer or did the user just type something bogus
-                if len(answer) > 19:
+                elif len(answer) > 19:
                     print("truncation - {} :{}".format(answer, len(answer)))
                     for k in response["answers"]:
                         c = str(k)
                         if answer[0:20] == c[0:20]:
-                            # return the next question id
-                            return response["answers"][k]
+                            # Record answer
+                            current_question = USER_DATA[sender_id][MEDICAL][MEDICAL_QA]
+                            if current_question in USER_DATA[sender_id][MEDICAL]:
+                                USER_DATA[sender_id][MEDICAL][current_question] += ", " + c
+                            else:
+                                USER_DATA[sender_id][MEDICAL][current_question] = c
 
-                # User made a mistake
-                return None
+                            # Update next question
+                            USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = response["id"]
+                            response = eval(repr(get_next_question(sender_id, lang_short, response["id"])))
+                            USER_DATA[sender_id][MEDICAL][MEDICAL_QA_RESPONSE] = response
+
+                            # Pop the 'Stop' command from quick_replies for multiple choice
+                            # Add a 'Next' button
+                            payload = payload_prepare(response)
+                            payload["text"] = lang["qa_multi"]["text"]
+                            payload["quick_replies"].pop()
+                            # for item in payload["quick_replies"]:
+                            #     user_items = USER_DATA[sender_id][MEDICAL]
+                            #     if item["title"] == USER_DATA[sender_id][REPLY]:
+                            #         payload["quick_replies"].remove(item)
+                            payload["quick_replies"].append({
+                                "content_type": "text",
+                                "payload": "<POSTBACK_PAYLOAD>",
+                                "title": lang["qa_next"]["text"]
+                            })
+                            send_message(sender_id, payload)
+
+                            # return the next question id
+                            return True
+
+                else:
+                    # User made a mistake
+                    return None
+
+            # Answer from button selection
+            else:
+                if answer in response["answers"]:
+                    # Record answer
+                    current_question = USER_DATA[sender_id][MEDICAL][MEDICAL_QA]
+                    USER_DATA[sender_id][MEDICAL][current_question] = answer
+
+                    # Update next question
+                    USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = response["answers"][answer]
+                    response = eval(repr(get_next_question(sender_id, lang_short, response["answers"][answer])))
+                    USER_DATA[sender_id][MEDICAL][MEDICAL_QA_RESPONSE] = response
+
+                    if response["multi"]:
+                        # Pop the 'Stop' command from quick_replies for multiple choice
+                        # Add a 'Next' button
+                        payload = payload_prepare(response)
+                        payload["quick_replies"].pop()
+                        payload["quick_replies"].append({
+                            "content_type": "text",
+                            "payload": "<POSTBACK_PAYLOAD>",
+                            "title": lang["qa_next"]["text"]
+                        })
+                        send_message(sender_id, payload)
+                    else:
+                        payload = payload_prepare(response)
+                        send_message(sender_id, payload)
+                    # return the next question id
+                    return True
+
+                else:
+                    # check if this is a truncated answer or did the user just type something bogus
+                    if len(answer) > 19:
+                        print("truncation - {} :{}".format(answer, len(answer)))
+                        for k in response["answers"]:
+                            c = str(k)
+                            if answer[0:20] == c[0:20]:
+                                # Record answer
+                                current_question = USER_DATA[sender_id][MEDICAL][MEDICAL_QA]
+                                USER_DATA[sender_id][MEDICAL][current_question] = c
+
+                                # Update next question
+                                USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = response["answers"][k]
+                                response = eval(
+                                    repr(get_next_question(sender_id, lang_short, response["answers"][k])))
+                                USER_DATA[sender_id][MEDICAL][MEDICAL_QA_RESPONSE] = response
+
+                                if response["multi"]:
+                                    # Pop the 'Stop' command from quick_replies for multiple choice
+                                    # Add a 'Next' button
+                                    payload = payload_prepare(response)
+                                    payload["quick_replies"].pop()
+                                    payload["quick_replies"].append({
+                                        "content_type": "text",
+                                        "payload": "<POSTBACK_PAYLOAD>",
+                                        "title": lang["qa_next"]["text"]
+                                    })
+                                    send_message(sender_id, payload)
+                                else:
+                                    payload = payload_prepare(response)
+                                    send_message(sender_id, payload)
+                                # return the next question id
+                                return True
+
+                    # User made a mistake
+                    return None
 
         except Exception as e:
-            print("the supplied user answer is not in the response answers")
             return None
     else:
-        print("there is no answers key")
         return None
 
 
@@ -1020,6 +1175,7 @@ def medical(sender_id):
 
     response = eval(repr(get_next_question(sender_id, lang_short, USER_DATA[sender_id][MEDICAL][MEDICAL_QA])))
     # Update QA builder
+    USER_DATA[sender_id][MEDICAL][MEDICAL_QA_RESPONSE] = response
     QA[lang_short][USER_DATA[sender_id][MEDICAL][MEDICAL_QA]] = response["text"]
     payload = payload_prepare(response)
     send_message(sender_id, payload)
@@ -1028,85 +1184,34 @@ def medical(sender_id):
 
 
 def medical_assessment(sender_id):
-    # Example of what this function does in a loop depending on the amount of questions
-    # if USER_DATA[sender_id][MEDICAL][MEDICAL_QA] == Q1:
-    #     # Record answer
-    #     USER_DATA[sender_id][MEDICAL][Q1] = USER_DATA[sender_id][REPLY]
-    #     # Set the next intent for the conversation
-    #     USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = Q2
-    #     payload = BOT_LANGUAGE["medical_assessment"][Q2]
-    #     send_message(sender_id, payload)
-
     lang, lang_short = choose_language(USER_DATA[sender_id][LANGUAGE])
-
-    # # Add the MEDICAL key if it does not exist
-    # if MEDICAL not in USER_DATA[sender_id]:
-    #     USER_DATA[sender_id][MEDICAL] = {}
-    #     USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = "Q1"
-    #
-    # for i in range(len(QA)):
-    #     # Command handler
-    #     if USER_DATA[sender_id][REPLY] == "Stop":
-    #         # Set the next intent for the conversation
-    #         USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
-    #         USER_DATA[sender_id][CURRENT_INTENT] = CANCEL
-    #         break
-    #
-    #     # Check if the last question was answered
-    #     if QA[i] == QA[len(QA)-1]:
-    #         # Record answer
-    #         USER_DATA[sender_id][MEDICAL][QA[i]] = USER_DATA[sender_id][REPLY]
-    #         # Set the next intent for the conversation
-    #         USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
-    #         break
-    #
-    #     # Continue with examination
-    #     elif USER_DATA[sender_id][MEDICAL][MEDICAL_QA] == QA[i]:
-    #         # Record answer
-    #         USER_DATA[sender_id][MEDICAL][QA[i]] = USER_DATA[sender_id][REPLY]
-    #         # Set the next intent for the conversation
-    #         USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = QA[i+1]
-    #         payload = lang["medical_assessment"][QA[i+1]]
-    #         send_message(sender_id, payload)
-    #         break
 
     # Command handler
     if USER_DATA[sender_id][REPLY] == "Stop":
         # Set the next intent for the conversation
         USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
         USER_DATA[sender_id][CURRENT_INTENT] = CANCEL
-        payload = lang["qa_finish"]
-        send_message(sender_id, payload)
+        # payload = lang["qa_finish"]
+        # send_message(sender_id, payload)
 
         return
 
     else:
-        # Record answer
-        current_question = USER_DATA[sender_id][MEDICAL][MEDICAL_QA]
-        USER_DATA[sender_id][MEDICAL][current_question] = USER_DATA[sender_id][REPLY]
-        # Check what the next question should be
-        response = eval(repr(get_next_question(sender_id, lang_short, current_question)))
+        response = USER_DATA[sender_id][MEDICAL][MEDICAL_QA_RESPONSE]
 
         if response:
             # Update QA builder
             QA[lang_short][USER_DATA[sender_id][MEDICAL][MEDICAL_QA]] = response["text"]
-            next_question = check_answer(response, USER_DATA[sender_id][MEDICAL][current_question])
+            # Check what the user answered to determine the next question id
+            next_question = check_answer(sender_id, response, USER_DATA[sender_id][REPLY])
 
             if next_question is not None:
-                USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = next_question
-                if next_question is not None:
-                    response = eval(repr(get_next_question(sender_id, lang_short, next_question)))
-                    if response:
-                        # Update QA builder
-                        QA["en"][USER_DATA[sender_id][MEDICAL][MEDICAL_QA]] = response["text"]
-                        payload = payload_prepare(response)
-                        send_message(sender_id, payload)
-                    # If response is False, end of the assessment is reached
-                    else:
-                        # Set the next intent for the conversation
-                        USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
-                        payload = lang["qa_finish"]
-                        send_message(sender_id, payload)
+                # End of the QA is reached
+                if next_question is False:
+                    # Set the next intent for the conversation
+                    USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
+                    # payload = lang["qa_finish"]
+                    # send_message(sender_id, payload)
 
             # User made a mistake
             else:
@@ -1119,8 +1224,8 @@ def medical_assessment(sender_id):
             # Set the next intent for the conversation
             USER_DATA[sender_id][MEDICAL][MEDICAL_QA] = DONE
             USER_DATA[sender_id][CURRENT_INTENT] = CANCEL
-            payload = lang["qa_finish"]
-            send_message(sender_id, payload)
+            # payload = lang["qa_finish"]
+            # send_message(sender_id, payload)
 
             return
     return

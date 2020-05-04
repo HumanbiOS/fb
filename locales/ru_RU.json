@@ -225,8 +225,11 @@
 	"qa_finish": {
 		"text": "Конец"
 	},
+	"qa_next": {
+		"text": "следующий"
+	},
 	"qa_multi": {
-		"text": "Since this is a multiple choice question, please press more options if you want to. Otherwise, press {0}"
+		"text": "Поскольку это вопрос с несколькими вариантами ответов, нажмите дополнительные параметры, если хотите. В противном случае нажмите «следующий»"
 	},
 	"unknown": {
 		"text": "Извините, но это не один из ожидаемых ответов."

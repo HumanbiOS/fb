@@ -225,8 +225,11 @@
 	"qa_finish": {
 		"text": "Terminar"
 	},
+	"qa_next": {
+		"text": "siguiente"
+	},
 	"qa_multi": {
-		"text": "Since this is a multiple choice question, please press more options if you want to. Otherwise, press {0}"
+		"text": "Dado que esta es una pregunta de opción múltiple, presione más opciones si lo desea. De lo contrario, presione 'siguiente'"
 	},
 	"unknown": {
 		"text": "Lo siento, pero esa no es ninguna de las respuestas esperadas."

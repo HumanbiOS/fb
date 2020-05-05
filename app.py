@@ -932,6 +932,8 @@ def payload_prepare(response):
         answers = response["answers"]
         quick_replies = []
         i = 0
+        long_answers = False
+        choices = "\n\nPossible answers are:\n"
         try:
             for key, values in answers.items():
                 quick_replies.append({
@@ -940,6 +942,9 @@ def payload_prepare(response):
                     "title": key
                 })
                 i += 1
+                if len(key) > 19:
+                    long_answers = True
+                choices += "{}) {}\n".format(i, key)
             # Add command at the end
             quick_replies.append({
                 "content_type": "text",
@@ -947,15 +952,27 @@ def payload_prepare(response):
                 "title": "Stop"
             })
             if response["comment"]:
-                payload = {
-                    "text": "{}\n\n{}".format(response["text"], response["comment"]),
-                    "quick_replies": quick_replies
-                }
+                if long_answers:
+                    payload = {
+                        "text": "{}\n\n{}{}".format(response["text"], response["comment"], choices),
+                        "quick_replies": quick_replies
+                    }
+                else:
+                    payload = {
+                        "text": "{}\n\n{}".format(response["text"], response["comment"]),
+                        "quick_replies": quick_replies
+                    }
             else:
-                payload = {
-                    "text": "{}".format(response["text"]),
-                    "quick_replies": quick_replies
-                }
+                if long_answers:
+                    payload = {
+                        "text": "{}{}".format(response["text"], choices),
+                        "quick_replies": quick_replies
+                    }
+                else:
+                    payload = {
+                        "text": "{}".format(response["text"]),
+                        "quick_replies": quick_replies
+                    }
         except Exception as e:
             payload = {
                 "text": "{}".format(response["text"])

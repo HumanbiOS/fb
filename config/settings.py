@@ -19,7 +19,6 @@ VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "")
 # Security tokens
 INSTANCE_SECURITY_TOKEN = os.getenv("INSTANCE_SECURITY_TOKEN", "")
 SERVER_SECURITY_TOKEN = os.getenv("SERVER_SECURITY_TOKEN", "")
-INSTANCE_NAME = os.getenv("INSTANCE_NAME")
 # Sever url
 SERVER_URL = os.getenv("SERVER_ADDRESS", "")
 # Webhook

@@ -5,6 +5,7 @@ import os
 import time
 import logging
 
+import asyncio
 import aiohttp
 from sanic import Sanic
 from sanic.response import text, json
@@ -32,6 +33,9 @@ app = Sanic(__name__)
 # Facebook Bot settings
 PAT = settings.PAT
 VERIFY_TOKEN = settings.VERIFY_TOKEN
+# REST Settings
+INSTANCE_SECURITY_TOKEN = None
+INSTANCE_NAME = None
 
 # Use this section to Do API calls to push data wherever needed..in this case telegram channel
 
@@ -50,8 +54,8 @@ async def handle_fb_message(data):
                         sender_id = int(messaging_event["sender"]["id"])
                         # REQUIRED PAYLOAD
                         payload = {
-                            "security_token": settings.INSTANCE_SECURITY_TOKEN,
-                            "via_instance": settings.INSTANCE_NAME,
+                            "security_token": INSTANCE_SECURITY_TOKEN,
+                            "via_instance": INSTANCE_NAME,
                             "service_in": "facebook",
                             "user": {
                                 "user_id": sender_id
@@ -101,7 +105,7 @@ async def handle_fb_message(data):
                         # Attachments
                         # TODO: Take care of attachments
 
-                        async with session.post(settings.SERVER_URL, json=payload, headers=H) as resp:
+                        async with session.post(f"{settings.SERVER_URL}/api/process_message", json=payload, headers=H) as resp:
                             # DEBUG:
                             ret_value = await resp.json()
                             logger.info(f"Server immediate response: {ret_value}")
@@ -211,5 +215,20 @@ async def handle_outgoing_message(request):
     return json({"status": 200, "timestamp": time.monotonic()})
 
 
+async def setup():
+    global INSTANCE_SECURITY_TOKEN, INSTANCE_NAME
+    data = {
+        "security_token": settings.SERVER_SECURITY_TOKEN,
+        "url": f"{settings.WEBHOOK}/webhooks/facebook/out"
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.post(f"{settings.SERVER_URL}/api/setup", json=data) as response:
+            result = await response.json()
+            if result['status'] == 200:
+                INSTANCE_SECURITY_TOKEN = result['token']
+                INSTANCE_NAME = result['name']
+
+
 if __name__ == '__main__':
+    asyncio.get_event_loop().run_until_complete(setup())
     app.run(host='127.0.0.1', port=8443, debug=False)

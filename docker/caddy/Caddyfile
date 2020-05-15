@@ -1,0 +1,3 @@
+facebook.domain.com {
+    reverse_proxy humanbios-fb:8443
+}

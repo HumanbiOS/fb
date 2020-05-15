@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  caddy:
+    container_name: caddy
+    image: caddy
+    restart: unless-stopped
+    ports:
+    - 80:80
+    - 443:443
+    volumes:
+    - ./Caddyfile:/etc/caddy/Caddyfile
+
+networks:
+  default:
+    external:
+      name: caddynet

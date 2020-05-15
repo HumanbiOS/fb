@@ -2,6 +2,7 @@
 
 ### Caddy webserver
 ```
+$ docker network create caddynet 
 $ docker pull caddy
 $ cd docker/caddy
 $ vim Caddyfile

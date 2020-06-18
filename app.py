@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import time
 import logging
 
@@ -19,14 +20,16 @@ logfile_path = os.path.join(logdir_path, "bot.log")
 if not os.path.exists(logdir_path):
     os.makedirs(logdir_path)
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s\t%(levelname)s:%(message)s')
 
-logfile_handler = logging.FileHandler(logfile_path, 'a', 'utf-8')
-logfile_handler.setLevel(logging.ERROR)
-logfile_handler.setFormatter(formatter)
-logger.addHandler(logfile_handler)
+h = logging.handlers.RotatingFileHandler(logfile_path, encoding='utf-8', maxBytes=5 * 1024 * 1024, backupCount=5)
+h.setFormatter(formatter)
+h.setLevel(logging.INFO)
+
+logger.addHandler(h)
+logger.addHandler(logging.StreamHandler(sys.stdout))
 
 app = Sanic(__name__)
 
@@ -140,9 +143,6 @@ async def handle_incoming_message(request):
 
 
 async def handle_server_message(data):
-    # Performance info
-    logger.info("response sending.. - {}".format(time.monotonic()))
-
     payload = {
         "recipient": {
             "id": data['user']['user_id']
@@ -153,19 +153,35 @@ async def handle_server_message(data):
     }
 
     if data['has_file']:
-        payload['message']['attachment'] = {
-                                            "type": "template",
-                                            "payload": {}
-                                            }
-        payload['message']['attachment']['payload']["template_type"] = "media"
-        payload['message']['attachment']['payload']["elements"] = []
         if data['has_image']:
-            for each_file in data['file']:
-                media = {
-                            "media_type": "image",
-                            "url": data['payload']
+            data_payload = {
+                "recipient": {
+                    "id": data["user"]["user_id"]
+                },
+                "message": {
+                    "attachment": {
+                        #"type": "template",
+                        #"payload": {
+                        #    "template_type": "generic",
+                        #    "elements": [
+                        #        {
+                        #            "title": "test",
+                        #            "image_url": _data['payload']
+                        #        } for _data in data['file']
+                        #    ]
+                        "type": "image",
+                        "payload": {
+                            "url": data['file'][0]['payload'], 
+                            "is_reusable": True
                         }
-                payload['message']['attachment']['payload']["elements"].append(media)
+                    }
+                }
+            }
+        else:
+            data_payload = None
+    else:
+        data_payload = None
+    print(data['file'])
 
     if data['has_buttons']:
         if data['buttons_type'] == 'inline':
@@ -190,11 +206,21 @@ async def handle_server_message(data):
 
     # Sending response back to the user using facebook graph API
     async with aiohttp.ClientSession() as session:
+        async with session.post("https://graph.facebook.com/v7.0/me/messages",
+                                params={"access_token": PAT},
+                                headers={"Content-Type": "application/json"},
+                                json=data_payload) as response:
+            # [DEBUG]
+            logger.info(f"response sent - {time.monotonic()}")
+            logger.info(f"facebook response - {await response.json()}")
+        
         async with session.post("https://graph.facebook.com/v2.6/me/messages",
                                 params={"access_token": PAT},
                                 headers={"Content-Type": "application/json"},
                                 json=payload) as response:
-            logger.info("response sent - {}".format(time.monotonic()))
+            # [DEBUG]
+            logger.info(f"response sent - {time.monotonic()}")
+            logger.info(f"facebook response - {await response.json()}")
 
 
 @app.route('/webhooks/facebook/out', methods=['POST'])

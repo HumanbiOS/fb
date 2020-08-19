@@ -1,23 +1,13 @@
-FROM docker.io/alpine:3.11
+FROM python:3.8-slim-buster
 
-RUN apk add --no-cache \
-      py3-aiohttp \
-      py3-magic \
-      py3-sqlalchemy \
-      py3-psycopg2 \
-      py3-beautifulsoup4 \
-      #hbmqtt
-          py3-yaml \
-      py3-idna \
-      py3-cffi \
-      su-exec
+WORKDIR /usr/src/app
 
-COPY . app/
-WORKDIR /app
+COPY requirements.txt ./
 
-RUN apk add --virtual .build-deps python3-dev libffi-dev build-base \
- && pip3 install --upgrade pip \
- && pip3 install -r requirements.txt \
- && apk del .build-deps
+RUN pip3 install --upgrade pip wheel \
+ && pip3 install -r requirements.txt
 
+COPY . .
+
+# Launch
 CMD python3 ./app.py

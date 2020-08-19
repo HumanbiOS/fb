@@ -5,8 +5,6 @@ services:
     container_name: humanbios-fb
     image: humanbios-fb
     restart: unless-stopped
-    ports:
-    - 8443:8443
 
 networks:
   default:

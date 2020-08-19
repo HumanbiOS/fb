@@ -17,7 +17,7 @@ $ cd ../..
 $ cp .env.sample .env
 $ vim .env
 ```
-Fill .env (Note: If using docker, ensure that server names and ports reflect the docker container name and port. Example: SERVER_ADDRESS=http://humanbios-server:8282  
+Fill .env (Note: If using docker, ensure that server names and ports reflect the docker container name and port. Example: SERVER_ADDRESS=http://humanbios-server:8080)
 ```
 $ docker build -t humanbios-fb . 
 $ docker-compose up -d

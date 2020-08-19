@@ -49,6 +49,7 @@ H = {'content-type': 'application/json'}
 
 
 async def handle_fb_message(data):
+    logging.info(data)
     if data["object"] == "page":
         async with aiohttp.ClientSession() as session:
             for entry in data["entry"]:
@@ -236,6 +237,7 @@ async def handle_outgoing_message(request):
         # Handle message
         await handle_server_message(data)
     except Exception as e:
+        logging.exception(e)
         return json({"status": 500, "error": str(e), "timestamp": time.monotonic()})
 
     return json({"status": 200, "timestamp": time.monotonic()})
